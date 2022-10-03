@@ -26,15 +26,19 @@ import java.util.HashMap;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
-public class frmPrincipal extends JFrame {
+public class frmPrincipal extends JFrame implements actionEvent{
 
 	private JPanel contentPane;
 	private JTable table;
 	private JScrollPane scroll;
 	private HashMap<Integer,Long> addresseMap;
+	private ArrayList<Livre> listeLivires = new ArrayList<>();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
-	private JComboBox cmbNumero;
+	private JComboBox cmbNumero =new JComboBox();
+	private JComboBox cmbCathegorie=new JComboBox();
+	private JComboBox cmbLivres=new JComboBox();
+	private DefaultTableModel model;
 
 
 	/**
@@ -58,6 +62,12 @@ public class frmPrincipal extends JFrame {
 	 */
 	public frmPrincipal() {
 		chargerLivres();
+		affichage();
+		action();
+	
+		
+	}
+	public void affichage() {
 		remplirTable("");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 608, 364);
@@ -84,20 +94,15 @@ public class frmPrincipal extends JFrame {
 		gbc_tlBar.gridy = 0;
 		contentPane.add(tlBar, gbc_tlBar);
 		
-		JComboBox cmbLivres = new JComboBox(new String[] {"Tous les livres"});
+		cmbLivres = new JComboBox(new String[] {"Tous les livres"});
 		cmbLivres.setToolTipText("");
 		tlBar.add(cmbLivres);
 		
 		//cmbLivres.setModel(new DefaultComboBoxModel(new String[] {"Tous les livres"}));
 		
 		//String[] listeChamps = getListeCBox();
-		JComboBox cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
-		cmbCathegorie.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				remplirTable("roman");
-			}
-		});
-		cmbCathegorie.setToolTipText("");
+		cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
+		//cmbCathegorie.setToolTipText("");
 		tlBar.add(cmbCathegorie);
 		
 		cmbNumero = new JComboBox(getListeCBox("num"));
@@ -105,7 +110,7 @@ public class frmPrincipal extends JFrame {
 		cmbNumero.setToolTipText("");
 		tlBar.add(cmbNumero);
 		
-		//table = new JTable();
+		//JTable table = new JTable(model);
 		scroll = new JScrollPane(table);
 
 		GridBagConstraints gbc_table = new GridBagConstraints();
@@ -116,6 +121,24 @@ public class frmPrincipal extends JFrame {
 		gbc_table.gridy = 1;
 		contentPane.add(scroll, gbc_table);
 	}
+	public void itemStateChanged(ItemEvent e) {
+		//contentPane.setVisible(false);
+		if(e.getSource()== cmbCathegorie){
+			remplirTable((String)cmbCathegorie.getSelectedItem());
+			JOptionPane.showMessageDialog(null, "bravo");
+			
+			contentPane.repaint();
+
+		}else if(e.getSource()== cmbNumero){
+			JOptionPane.showMessageDialog(null, "bravo");
+			
+			contentPane.repaint();
+
+		}
+			//contentPane.setVisible(true);
+		}
+
+
 	public String[] getListeCBox(String choix){
 
 		int num=0;
@@ -172,21 +195,20 @@ public class frmPrincipal extends JFrame {
 
 	public void chargerLivres() {
 		addresseMap = new HashMap<>();
-
-		   
-			try {
+		int cle = 0;
+		String  titre = "";
+		int auteur = 0;
+		int annee = 0;
+		int pages = 0;
+		String cathegorie = "";
+		try {
 				File file = new File("src\\livres.bin");
 				if(file.exists()){
-					String  titre = "";
-					int auteur = 0;
-					int annee = 0;
-					int pages = 0;
-					String cathegorie = "";
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					donnee.seek(0);
 					for (int i=0;i<donnee.length();i++){
 							long adr = donnee.getFilePointer();
-							int cle = donnee.readInt();
+							cle = donnee.readInt();
 							titre=donnee.readUTF();
 							auteur=donnee.readInt();
 							annee=donnee.readInt();
@@ -194,6 +216,7 @@ public class frmPrincipal extends JFrame {
 							cathegorie=donnee.readUTF();
 							addresseMap.put(cle,adr); 
 							Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
+							listeLivires.add(livre);
 					}
 					donnee.close();
 				}else{
@@ -201,17 +224,11 @@ public class frmPrincipal extends JFrame {
 				    donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					String ligne = tmpReadTxt.readLine();
 					String[] elemt = new String[6];
-					int num = 0;
-					String  titre = "";
-					int auteur = 0;
-					int annee = 0;
-					int pages = 0;
-					String cathegorie = "";
 					donnee.seek(0);
 
 					while(ligne != null){
 						elemt = ligne.split(";");
-						num = Integer.parseInt(elemt[0]);
+						cle = Integer.parseInt(elemt[0]);
 						titre =elemt[1];
 						auteur = Integer.parseInt(elemt[2]);
 						annee = Integer.parseInt(elemt[3]);
@@ -219,14 +236,16 @@ public class frmPrincipal extends JFrame {
 						cathegorie =  elemt[5];
 						Long lng =donnee.getFilePointer();
 						//400;Une aventure d'Astérix le gaulois. Le devin;11;1972;48;bandes dessinées 4+30+4+4+4+20=96
-						addresseMap.put(num,lng);
-						donnee.writeInt(num);
+						addresseMap.put(cle,lng);
+						donnee.writeInt(cle);
 						donnee.writeUTF(titre);
 						donnee.writeInt(auteur);
 						donnee.writeInt(annee);
 						donnee.writeInt(pages);
 						donnee.writeUTF(cathegorie);
-						
+						Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
+						listeLivires.add(livre);
+					
 						ligne = tmpReadTxt.readLine();
 					}	
 
@@ -243,9 +262,24 @@ public class frmPrincipal extends JFrame {
 	public void remplirTable(String entree) {
 		
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
-		DefaultTableModel model = new DefaultTableModel(column,0);
+		model = new DefaultTableModel(column,0);
 		table = new JTable(model);
-		int num = 0;
+		if(entree.equals("")){
+			for(Livre livre:listeLivires){
+				model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+			}
+		}else{
+			for(Livre livre:listeLivires){
+				String str = livre.getCathegorie();
+				if(entree.equals(str)){
+					model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+
+				}
+			}
+
+		}
+
+/*		int num = 0;
 		String  titre = "";
 		int auteur = 0;
 		int annee = 0;
@@ -253,25 +287,23 @@ public class frmPrincipal extends JFrame {
 		String cathegorie = "";
 		try {
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
-			
-			donnee.seek(0);
-			for (Integer cle:addresseMap.keySet()){
-                            
-				long adr = addresseMap.get(cle);
-                donnee.seek(adr); 
-				num=donnee.readInt();
-                titre=donnee.readUTF();
-                auteur=donnee.readInt();
-                annee=donnee.readInt();
-                pages=donnee.readInt();
-                cathegorie=donnee.readUTF();
-                
-				if(entree.equals("")){
-					model.addRow(new Object[]{String.valueOf(num),titre,String.valueOf(auteur),String.valueOf(annee),String.valueOf(pages),cathegorie});				
-				}else if(cathegorie.equals(entree)){
-					model.addRow(new Object[]{String.valueOf(num),titre,String.valueOf(auteur),String.valueOf(annee),String.valueOf(pages),cathegorie});				
-
-				}	
+				
+				donnee.seek(0);
+				for (Integer cle:addresseMap.keySet()){
+								
+					long adr = addresseMap.get(cle);
+					donnee.seek(adr); 
+					num=donnee.readInt();
+					titre=donnee.readUTF();
+					auteur=donnee.readInt();
+					annee=donnee.readInt();
+					pages=donnee.readInt();
+					cathegorie=donnee.readUTF();
+					if(entree.equals("")){
+						model.addRow(new Object[]{String.valueOf(num),titre,String.valueOf(auteur),String.valueOf(annee),String.valueOf(pages),cathegorie});				
+					}else if(cathegorie.equals(entree)){
+						model.addRow(new Object[]{String.valueOf(num),titre,String.valueOf(auteur),String.valueOf(annee),String.valueOf(pages),cathegorie});				
+					}	
 				
 			}	
 			donnee.close();				
@@ -280,7 +312,7 @@ public class frmPrincipal extends JFrame {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
+		*/
 	}
 	public void afficher() {
 		JTextArea retour = new JTextArea(20,95);
@@ -327,6 +359,13 @@ public class frmPrincipal extends JFrame {
 			}
 		} 
 		return adr;
+		
+	}
+
+	@Override
+	public void action() {
+		cmbCathegorie.addItemListener(this::itemStateChanged);
+		cmbNumero.addItemListener(this::itemStateChanged);
 		
 	}
 
