@@ -1,6 +1,7 @@
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -11,6 +12,7 @@ import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 
@@ -24,40 +26,26 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.awt.event.ItemListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 
 public class frmPrincipal extends JFrame implements actionEvent{
 
-	private JPanel contentPane;
+	private JPanel contentPane = new JPanel();
 	private JTable table;
 	private JScrollPane scroll;
 	private HashMap<Integer,Long> addresseMap;
 	private ArrayList<Livre> listeLivires = new ArrayList<>();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
-	private JComboBox cmbNumero =new JComboBox();
-	private JComboBox cmbCathegorie=new JComboBox();
-	private JComboBox cmbLivres=new JComboBox();
-	private DefaultTableModel model;
-
-
+	static JComboBox cmbNumero =new JComboBox(getListeCBox("num"));
+	static JComboBox cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
+	
+	static JButton btnLivres = new JButton("Tous les livres");
+	//private DefaultTableModel model;
+	static GridBagConstraints gbc_tlBar;
 	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					frmPrincipal frame = new frmPrincipal();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
-	/**
 	 * Create the frame.
 	 */
 	public frmPrincipal() {
@@ -68,50 +56,43 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		
 	}
 	public void affichage() {
-		remplirTable("");
+		//table = new JTable();
+		//remplirTable("");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 608, 364);
-		contentPane = new JPanel();
+		setBounds(100, 100, 800, 500);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		setContentPane(contentPane);
+		cmbNumero =new JComboBox(getListeCBox("num"));
+		cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
+		
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[]{266, 62, 0};
 		gbl_contentPane.rowHeights = new int[]{21, 0, 0, 0};
 		gbl_contentPane.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
 		gbl_contentPane.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
+		scroll = new JScrollPane(table);
 		
 		JToolBar tlBar = new JToolBar();
 		tlBar.setToolTipText("Liste des livres");
 		tlBar.setForeground(Color.BLACK);
 		tlBar.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		tlBar.setBackground(Color.WHITE);
-		GridBagConstraints gbc_tlBar = new GridBagConstraints();
+		gbc_tlBar = new GridBagConstraints();
 		gbc_tlBar.insets = new Insets(0, 0, 5, 5);
 		gbc_tlBar.anchor = GridBagConstraints.NORTHWEST;
 		gbc_tlBar.gridx = 0;
 		gbc_tlBar.gridy = 0;
 		contentPane.add(tlBar, gbc_tlBar);
 		
-		cmbLivres = new JComboBox(new String[] {"Tous les livres"});
-		cmbLivres.setToolTipText("");
-		tlBar.add(cmbLivres);
-		
-		//cmbLivres.setModel(new DefaultComboBoxModel(new String[] {"Tous les livres"}));
-		
-		//String[] listeChamps = getListeCBox();
-		cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
-		//cmbCathegorie.setToolTipText("");
+		tlBar.add(btnLivres);
+		//JLabel lblCath = new JLabel("Choisissez votre Cathegorie");
+		//tlBar.add(lblCath);
 		tlBar.add(cmbCathegorie);
-		
-		cmbNumero = new JComboBox(getListeCBox("num"));
-		//cmbNumero.setModel(new DefaultComboBoxModel(getListeCBox("cathegorie"));
-		cmbNumero.setToolTipText("");
+		//JLabel lblNumero = new JLabel("Choisissez votre Numero");
+		//tlBar.add(lblNumero);
 		tlBar.add(cmbNumero);
-		
-		//JTable table = new JTable(model);
-		scroll = new JScrollPane(table);
 
 		GridBagConstraints gbc_table = new GridBagConstraints();
 		gbc_table.gridwidth = 2;
@@ -124,9 +105,15 @@ public class frmPrincipal extends JFrame implements actionEvent{
 	public void itemStateChanged(ItemEvent e) {
 		//contentPane.setVisible(false);
 		if(e.getSource()== cmbCathegorie){
-			remplirTable((String)cmbCathegorie.getSelectedItem());
-			JOptionPane.showMessageDialog(null, "bravo");
-			
+			//remplirTable("");
+			//contentPane.setVisible(false);
+			scroll = remplirTable((String)cmbCathegorie.getSelectedItem());
+			//table = new JTable(model);
+			//scroll = new JScrollPane(table);
+			//contentPane.setVisible(true);
+				JOptionPane.showMessageDialog(null, "Votre choix :" +(String)cmbCathegorie.getSelectedItem());
+				//contentPane.repaint();
+			affichage();
 			contentPane.repaint();
 
 		}else if(e.getSource()== cmbNumero){
@@ -139,7 +126,57 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		}
 
 
-	public String[] getListeCBox(String choix){
+	public JScrollPane remplirTable(String entree) {
+		
+		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
+		DefaultTableModel model = new DefaultTableModel(column,0);
+		table = new JTable(model);
+		if(entree.equals("")){
+			for(Livre livre:listeLivires){
+				model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+			}
+		}else{
+			for(Livre livre:listeLivires){
+				String str = livre.getCathegorie();
+				if(entree.equals(str)){
+					model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+
+				}
+			}
+
+		}
+		//table = new JTable(model);
+		
+		JScrollPane scroll = new JScrollPane(table);
+		return scroll;
+
+	}
+	public void actionBtn(ActionEvent ev){
+		if(ev.getSource()== btnLivres){
+			//JOptionPane.showMessageDialog(null, "bravo");
+			scroll = remplirTable("");
+			//table = new JTable(model);
+			//scroll = new JScrollPane(table);
+			affichage();
+			
+			contentPane.repaint();
+
+		}
+	}
+
+	@Override
+	public void action() {
+		cmbCathegorie.addItemListener(this::itemStateChanged);
+		cmbNumero.addItemListener(this::itemStateChanged);
+		btnLivres.addActionListener(this::actionBtn);
+		
+	}
+
+	/**
+	 * Launch the application.
+	 */
+
+	public static String[] getListeCBox(String choix){
 
 		int num=0;
 		String  titre = "";
@@ -259,25 +296,35 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		}
 		
 	}
-	public void remplirTable(String entree) {
-		
-		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
-		model = new DefaultTableModel(column,0);
-		table = new JTable(model);
-		if(entree.equals("")){
-			for(Livre livre:listeLivires){
-				model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+	public Long rechercherAddresse(int cle) {
+		long adr=-1;
+		System.out.println(addresseMap.size());
+		for(Integer key:addresseMap.keySet()){
+			if(key==cle){
+				adr=addresseMap.get(key);
+				break;
 			}
-		}else{
-			for(Livre livre:listeLivires){
-				String str = livre.getCathegorie();
-				if(entree.equals(str)){
-					model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+		} 
+		return adr;
+		
+	}
 
+	 public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					frmPrincipal frame = new frmPrincipal();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
+		});
+	}
 
-		}
+
+
+}
 
 /*		int num = 0;
 		String  titre = "";
@@ -313,7 +360,7 @@ public class frmPrincipal extends JFrame implements actionEvent{
 			// TODO: handle exception
 		}
 		*/
-	}
+	/*
 	public void afficher() {
 		JTextArea retour = new JTextArea(20,95);
 		retour.append("Numero\t"+ Livre.formatMot("Titre",100)+"\t\tNumero Auteur\tAnnee\tPages\tCathegorie\n");
@@ -348,27 +395,4 @@ public class frmPrincipal extends JFrame implements actionEvent{
 						}
 						JScrollPane pane = new JScrollPane(retour);
 						JOptionPane.showMessageDialog(null, pane);			
-	}
-	public Long rechercherAddresse(int cle) {
-		long adr=-1;
-		System.out.println(addresseMap.size());
-		for(Integer key:addresseMap.keySet()){
-			if(key==cle){
-				adr=addresseMap.get(key);
-				break;
-			}
-		} 
-		return adr;
-		
-	}
-
-	@Override
-	public void action() {
-		cmbCathegorie.addItemListener(this::itemStateChanged);
-		cmbNumero.addItemListener(this::itemStateChanged);
-		
-	}
-
-
-
-}
+	}*/
