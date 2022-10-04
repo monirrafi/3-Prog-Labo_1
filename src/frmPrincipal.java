@@ -1,6 +1,7 @@
 import java.awt.EventQueue;
 
 import javax.swing.*;
+import javax.swing.JComponent.AccessibleJComponent;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -146,13 +147,15 @@ public class frmPrincipal extends JFrame implements actionEvent{
 			contentPane.repaint();
 
 		}else if(ev.getSource()== btnModifierTitre){
+			modifierLivre();
 
 		}else if(ev.getSource()== btnSuprimer){
 			Suprimer();
 
 		}else if(ev.getSource()== btnAjouter){
-			ArrayList<String> data = new ArrayList<>(){{add(null);add(null);add(null);add(null);add(null);add(null);}};
-			paneString(data);
+//			ArrayList<String> data = new ArrayList<>(){{add(null);add(null);add(null);add(null);add(null);add(null);}};
+			//paneString(data);
+			ajouter();
 
 		}
 	}
@@ -362,27 +365,17 @@ public class frmPrincipal extends JFrame implements actionEvent{
 	}
 	public String[] paneString(ArrayList<String> data) {
 		String[] retour = new String[6];
-		if(data.get(0).equals(null)){
-		int cle= Integer.parseInt(JOptionPane.showInputDialog(null, "Entrez le cle a ajouter"));
-	   	if(rechercheCle(cle)){
-				JOptionPane.showMessageDialog(null, "le cle existe");
-				
-			}else{
-
-		
-
+//		if(data.get(0)==null){
 				Dimension d =new Dimension(150,20);
 				ArrayList<JTextField> listeJtxt = new ArrayList<>();
 				ArrayList<String> listeChamps= new ArrayList<String>();
 				listeChamps = new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");add("Cathegorie");}};
 				
 				JPanel gPane = new JPanel(new GridLayout(listeChamps.size(),1));
-				
 				for(int i=0;i<listeChamps.size();i++){
 					JPanel pane = new JPanel();
 					JTextField jtxt = new JTextField(data.get(i));
 					jtxt.setPreferredSize(d);
-	
 					JLabel lbl = new JLabel(listeChamps.get(i));
 					lbl.setPreferredSize(d);
 					lbl.setLabelFor(jtxt);
@@ -398,11 +391,61 @@ public class frmPrincipal extends JFrame implements actionEvent{
 						retour[i]= listeJtxt.get(i).getText();
 					}
 				} 
-			}
-		}
+			//}
+		
 		
 		return retour;        
 	
+	}
+	public void ajouter() {
+		String strCle = JOptionPane.showInputDialog(null, "Entrez le numero du livre a ajouter");
+		int cle= Integer.parseInt(strCle);
+	   	if(rechercheCle(cle)){
+				JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +"  existe deja!!");
+				
+		}else{
+			ArrayList<String> data = new ArrayList<>(){{add(strCle);add(null);add(null);add(null);add(null);add(null);}};
+			String[] retour = paneString(data);
+			listeLivires.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
+				Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
+			sauvgarder();
+			DefaultComboBoxModel model = new DefaultComboBoxModel<>(getListeCBox("num"));
+			cmbNumero.removeAll();
+			cmbNumero.setModel(model);
+		}
+
+	}
+	public void modifierLivre() {
+		String strCle = JOptionPane.showInputDialog(null, "Entrez le numero du livre a modifier");
+		int cle= Integer.parseInt(strCle);
+	   	if(!rechercheCle(cle)){
+				JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +"n' existe pas!!");
+				
+		}else{
+			for(Livre livre:listeLivires){
+				if(livre.getNum()==cle){
+					ArrayList<String> data = new ArrayList<>(){{
+						add(strCle);add(livre.getTitre());
+						add(String.valueOf(livre.getAuteur()));add(String.valueOf(livre.getAnnee()));
+						add(String.valueOf(livre.getPages()));add(livre.getCathegorie());}};
+					String[] retour = paneString(data);
+					livre.setNum(cle);
+					livre.setTitre(retour[1]);
+					livre.setAuteur(Integer.parseInt(retour[2]));
+					livre.setAnnee(Integer.parseInt(retour[3]));
+					livre.setPages(Integer.parseInt(retour[4]));
+					livre.setCathegorie(retour[5]);
+					sauvgarder();
+					DefaultComboBoxModel model = new DefaultComboBoxModel<>(getListeCBox("num"));
+					cmbNumero.removeAll();
+					cmbNumero.setModel(model);
+					break;
+				}
+
+			}	
+		}
+
+		
 	}
 	 public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
