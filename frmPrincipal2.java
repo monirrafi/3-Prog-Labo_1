@@ -1,39 +1,54 @@
-import java.awt.EventQueue;
+/*import java.awt.EventQueue;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JToolBar;
+import java.awt.Color;
+import java.awt.Font;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
 
-import java.awt.*;
-import java.io.*;
-import java.util.*;
-import java.awt.event.*;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.awt.event.ItemListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 
-public class frmPrincipal extends JFrame implements actionEvent{
+public class frmPrincipal2 extends JFrame implements actionEvent{
 
-	static JPanel contentPane = new JPanel();
-	static JTable table;
+	private JPanel contentPane = new JPanel();
+	private JTable table;
 	private JScrollPane scroll;
-	static HashMap<Integer,Long> addresseMap;
-	static ArrayList<Livre> listeLivires = new ArrayList<>();
+	private HashMap<Integer,Long> addresseMap;
+	private ArrayList<Livre> listeLivires = new ArrayList<>();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
 	static JComboBox cmbNumero =new JComboBox(getListeCBox("num"));
 	static JComboBox cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
 	
 	static JButton btnLivres = new JButton("Tous les livres");
-	static JButton btnModifierTitre = new JButton("Modifier les livres");
-	static JButton btnSuprimer = new JButton("Suprimer des livres");
-	static JButton btnAjouter = new JButton("Ajout des livres");
-
 	//private DefaultTableModel model;
 	static GridBagConstraints gbc_tlBar;
-	
 	/**
 
 	 * Create the frame.
-	 */
-	public frmPrincipal() {
+	 
+	public frmPrincipal2() {
 		chargerLivres();
 		affichage();
 		action();
@@ -41,23 +56,23 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		
 	}
 	public void affichage() {
-		contentPane = new JPanel();
+		//table = new JTable();
+		//remplirTable("");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1100, 500);
+		setBounds(100, 100, 800, 500);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
 		setContentPane(contentPane);
+		cmbNumero =new JComboBox(getListeCBox("num"));
+		cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
+		
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[]{266, 62, 0};
 		gbl_contentPane.rowHeights = new int[]{21, 0, 0, 0};
 		gbl_contentPane.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
 		gbl_contentPane.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
-		
-		scroll = new JScrollPane();
-
-		cmbNumero =new JComboBox(getListeCBox("num"));
-		cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
-		btnLivres = new JButton("Tous les livres");		
+		scroll = new JScrollPane(table);
 		
 		JToolBar tlBar = new JToolBar();
 		tlBar.setToolTipText("Liste des livres");
@@ -72,15 +87,12 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		contentPane.add(tlBar, gbc_tlBar);
 		
 		tlBar.add(btnLivres);
-		JLabel lblCath = new JLabel("Choisissez votre Cathegorie");
-		tlBar.add(lblCath);
+		//JLabel lblCath = new JLabel("Choisissez votre Cathegorie");
+		//tlBar.add(lblCath);
 		tlBar.add(cmbCathegorie);
-		JLabel lblNumero = new JLabel("Choisissez votre Numero");
-		tlBar.add(lblNumero);
+		//JLabel lblNumero = new JLabel("Choisissez votre Numero");
+		//tlBar.add(lblNumero);
 		tlBar.add(cmbNumero);
-		tlBar.add(btnModifierTitre);
-		tlBar.add(btnAjouter);
-		tlBar.add(btnSuprimer);
 
 		GridBagConstraints gbc_table = new GridBagConstraints();
 		gbc_table.gridwidth = 2;
@@ -91,66 +103,63 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		contentPane.add(scroll, gbc_table);
 	}
 	public void itemStateChanged(ItemEvent e) {
+		//contentPane.setVisible(false);
 		if(e.getSource()== cmbCathegorie){
-			scroll = remplirTable((String)cmbCathegorie.getSelectedItem(),0);
-				JOptionPane.showMessageDialog(null, scroll);
-//			affichage();
+			//remplirTable("");
+			//contentPane.setVisible(false);
+			scroll = remplirTable((String)cmbCathegorie.getSelectedItem());
+			//table = new JTable(model);
+			//scroll = new JScrollPane(table);
+			//contentPane.setVisible(true);
+				JOptionPane.showMessageDialog(null, "Votre choix :" +(String)cmbCathegorie.getSelectedItem());
+				//contentPane.repaint();
+			affichage();
+			contentPane.repaint();
 
 		}else if(e.getSource()== cmbNumero){
-			scroll = remplirTable("",Integer.parseInt((String)cmbNumero.getSelectedItem()));
-			JOptionPane.showMessageDialog(null, scroll);
+			JOptionPane.showMessageDialog(null, "bravo");
+			
+			contentPane.repaint();
+
 		}
-			contentPane.setVisible(true);
+			//contentPane.setVisible(true);
 		}
 
 
-	public JScrollPane remplirTable(String entree,int cle) {
+	public JScrollPane remplirTable(String entree) {
 		
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
-
-		if(cle==0){
-			if(entree.equals("")){
-				for(Livre livre:listeLivires){
-					model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
-				}
-			}else{
-				for(Livre livre:listeLivires){
-					String str = livre.getCathegorie();
-					if(entree.equals(str)){
-						model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
-
-					}
-				}
+		table = new JTable(model);
+		if(entree.equals("")){
+			for(Livre livre:listeLivires){
+				model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
 			}
-
 		}else{
 			for(Livre livre:listeLivires){
-				int num = livre.getNum();
-				if(cle ==num){
+				String str = livre.getCathegorie();
+				if(entree.equals(str)){
 					model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
 
 				}
 			}
 
 		}
-		table = new JTable(model);
+		//table = new JTable(model);
+		
 		JScrollPane scroll = new JScrollPane(table);
 		return scroll;
 
 	}
 	public void actionBtn(ActionEvent ev){
 		if(ev.getSource()== btnLivres){
-			scroll = remplirTable("",0);
-			JOptionPane.showMessageDialog(null, scroll);
+			//JOptionPane.showMessageDialog(null, "bravo");
+			scroll = remplirTable("");
+			//table = new JTable(model);
+			//scroll = new JScrollPane(table);
+			affichage();
+			
 			contentPane.repaint();
-
-		}else if(ev.getSource()== btnModifierTitre){
-
-		}else if(ev.getSource()== btnSuprimer){
-			Suprimer();
-
-		}else if(ev.getSource()== btnAjouter){
 
 		}
 	}
@@ -160,16 +169,13 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		cmbCathegorie.addItemListener(this::itemStateChanged);
 		cmbNumero.addItemListener(this::itemStateChanged);
 		btnLivres.addActionListener(this::actionBtn);
-		btnAjouter.addActionListener(this::actionBtn);
-		btnModifierTitre.addActionListener(this::actionBtn);
-		btnSuprimer.addActionListener(this::actionBtn);
 		
 	}
-
+*/
 	/**
 	 * Launch the application.
 	 */
-
+/*
 	public static String[] getListeCBox(String choix){
 
 		int num=0;
@@ -302,54 +308,7 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		return adr;
 		
 	}
-	public void Suprimer() {
-		int cle = Integer.parseInt(JOptionPane.showInputDialog(null, "Entrez le numero du livre a suprimer :"));
-		for(Livre livre:listeLivires){
-			if(livre.getNum()==cle){
-				listeLivires.remove(livre);
-				break;
-			}
-		}
-		sauvgarder();
-		DefaultComboBoxModel model = new DefaultComboBoxModel<>(getListeCBox("num"));
-		cmbNumero.removeAll();
-		cmbNumero.setModel(model);
-		
-	}
-	public void sauvgarder() {
-		addresseMap = new HashMap<>();
-		int cle = 0;
-		String  titre = "";
-		int auteur = 0;
-		int annee = 0;
-		int pages = 0;
-		String cathegorie = "";
-		try {
-					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
-					donnee.seek(0);
-					for (Livre livre:listeLivires){
-						cle = livre.getNum();
-						titre =livre.getTitre();
-						auteur = livre.getAuteur();
-						annee = livre.getAnnee();
-						pages = livre.getPages();
-						cathegorie =  livre.getCathegorie();
-						Long lng =donnee.getFilePointer();
-						//400;Une aventure d'Astérix le gaulois. Le devin;11;1972;48;bandes dessinées 4+30+4+4+4+20=96
-						addresseMap.put(cle,lng);
-						donnee.writeInt(cle);
-						donnee.writeUTF(titre);
-						donnee.writeInt(auteur);
-						donnee.writeInt(annee);
-						donnee.writeInt(pages);
-						donnee.writeUTF(cathegorie);
-					}
-					donnee.close();
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
-				
-	}
+
 	 public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -362,16 +321,11 @@ public class frmPrincipal extends JFrame implements actionEvent{
 			}
 		});
 	}
-	public JScrollPane getScroll() {
-		return scroll;
-	}
-	public void setScroll(JScrollPane scroll) {
-		this.scroll = scroll;
-	}
+
 
 
 }
-
+*/
 /*		int num = 0;
 		String  titre = "";
 		int auteur = 0;
