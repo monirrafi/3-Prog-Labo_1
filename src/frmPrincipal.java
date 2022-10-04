@@ -151,6 +151,8 @@ public class frmPrincipal extends JFrame implements actionEvent{
 			Suprimer();
 
 		}else if(ev.getSource()== btnAjouter){
+			ArrayList<String> data = new ArrayList<>(){{add(null);add(null);add(null);add(null);add(null);add(null);}};
+			paneString(data);
 
 		}
 	}
@@ -349,6 +351,58 @@ public class frmPrincipal extends JFrame implements actionEvent{
 					// TODO: handle exception
 				}
 				
+	}
+	public boolean rechercheCle(int cle) {
+		for(Livre livre:listeLivires){
+			if(cle==livre.getNum()){
+				return true;
+			}
+		}
+		return false;
+	}
+	public String[] paneString(ArrayList<String> data) {
+		String[] retour = new String[6];
+		if(data.get(0).equals(null)){
+		int cle= Integer.parseInt(JOptionPane.showInputDialog(null, "Entrez le cle a ajouter"));
+	   	if(rechercheCle(cle)){
+				JOptionPane.showMessageDialog(null, "le cle existe");
+				
+			}else{
+
+		
+
+				Dimension d =new Dimension(150,20);
+				ArrayList<JTextField> listeJtxt = new ArrayList<>();
+				ArrayList<String> listeChamps= new ArrayList<String>();
+				listeChamps = new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");add("Cathegorie");}};
+				
+				JPanel gPane = new JPanel(new GridLayout(listeChamps.size(),1));
+				
+				for(int i=0;i<listeChamps.size();i++){
+					JPanel pane = new JPanel();
+					JTextField jtxt = new JTextField(data.get(i));
+					jtxt.setPreferredSize(d);
+	
+					JLabel lbl = new JLabel(listeChamps.get(i));
+					lbl.setPreferredSize(d);
+					lbl.setLabelFor(jtxt);
+					listeJtxt.add(jtxt);
+					pane.add(lbl);
+					pane.add(jtxt);
+					gPane.add(pane);
+
+				}
+				int res = JOptionPane.showConfirmDialog(null,gPane);
+				if(res == JOptionPane.YES_OPTION){
+					for(int i=0;i<listeJtxt.size();i++){
+						retour[i]= listeJtxt.get(i).getText();
+					}
+				} 
+			}
+		}
+		
+		return retour;        
+	
 	}
 	 public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
