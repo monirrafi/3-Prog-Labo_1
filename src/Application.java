@@ -1,7 +1,4 @@
-import java.awt.EventQueue;
-
 import javax.swing.*;
-import javax.swing.JComponent.AccessibleJComponent;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -10,18 +7,22 @@ import java.io.*;
 import java.util.*;
 import java.awt.event.*;
 
-public class frmPrincipal extends JFrame implements actionEvent{
+public class Application extends JFrame implements actionEvent{
 
 	static JPanel contentPane = new JPanel();
-	static JTable table;
-	private JScrollPane scroll;
+	static JScrollPane scroll =new JScrollPane();
+	//private JPanel tablePane = new JPanel();
+	private JTable table = new JTable();
+
+	static String nomFichier;
 	static HashMap<Integer,Long> addresseMap;
-	static ArrayList<Livre> listeLivires = new ArrayList<>();
+	static ArrayList<Livre> listeLivres = new ArrayList<>();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
-	static JComboBox cmbNumero =new JComboBox(getListeCBox("num"));
-	static JComboBox cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
-	
+
+	JComboBox cmbNumero =new JComboBox(getListeCBox("num"));
+	JComboBox cmbCathegorie = new  JComboBox(getListeCBox("cathegorie"));
+
 	static JButton btnLivres = new JButton("Tous les livres");
 	static JButton btnModifierTitre = new JButton("Modifier les livres");
 	static JButton btnSuprimer = new JButton("Suprimer des livres");
@@ -34,7 +35,7 @@ public class frmPrincipal extends JFrame implements actionEvent{
 
 	 * Create the frame.
 	 */
-	public frmPrincipal() {
+	public Application() {
 		chargerLivres();
 		affichage();
 		action();
@@ -54,7 +55,14 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		gbl_contentPane.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
 		
-		scroll = new JScrollPane();
+		//scroll = remplirTable("", 0);
+		//scroll.setVisible(false);
+		//tablePane = remplirTable("", 0);
+		//setScroll( remplirTable("", 0));
+		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
+		DefaultTableModel model = new DefaultTableModel(column,0);
+		table.setModel(model);
+		scroll = new JScrollPane(table);
 
 		cmbNumero =new JComboBox(getListeCBox("num"));
 		cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
@@ -83,69 +91,28 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		tlBar.add(btnAjouter);
 		tlBar.add(btnSuprimer);
 
+		gbc_tlBar.gridwidth = 2;
+		//gbc_t.insets = new Insets(0, 0, 5, 5);
+		gbc_tlBar.fill = GridBagConstraints.BOTH;
+		gbc_tlBar.gridx = 0;
+		gbc_tlBar.gridy = 1;
+		contentPane.add(scroll, gbc_tlBar);
+		/*
 		GridBagConstraints gbc_table = new GridBagConstraints();
 		gbc_table.gridwidth = 2;
 		gbc_table.insets = new Insets(0, 0, 5, 5);
 		gbc_table.fill = GridBagConstraints.BOTH;
 		gbc_table.gridx = 0;
 		gbc_table.gridy = 1;
-		contentPane.add(scroll, gbc_table);
-	}
-	public void itemStateChanged(ItemEvent e) {
-		if(e.getSource()== cmbCathegorie){
-			scroll = remplirTable((String)cmbCathegorie.getSelectedItem(),0);
-				JOptionPane.showMessageDialog(null, scroll);
-//			affichage();
-
-		}else if(e.getSource()== cmbNumero){
-			scroll = remplirTable("",Integer.parseInt((String)cmbNumero.getSelectedItem()));
-			JOptionPane.showMessageDialog(null, scroll);
-		}
-			contentPane.setVisible(true);
-		}
-
-
-	public JScrollPane remplirTable(String entree,int cle) {
-		
-		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
-		DefaultTableModel model = new DefaultTableModel(column,0);
-
-		if(cle==0){
-			if(entree.equals("")){
-				for(Livre livre:listeLivires){
-					model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
-				}
-			}else{
-				for(Livre livre:listeLivires){
-					String str = livre.getCathegorie();
-					if(entree.equals(str)){
-						model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
-
-					}
-				}
-			}
-
-		}else{
-			for(Livre livre:listeLivires){
-				int num = livre.getNum();
-				if(cle ==num){
-					model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
-
-				}
-			}
-
-		}
-		table = new JTable(model);
-		JScrollPane scroll = new JScrollPane(table);
-		return scroll;
-
+		contentPane.add(scroll, gbc_table);*/
 	}
 	public void actionBtn(ActionEvent ev){
 		if(ev.getSource()== btnLivres){
-			scroll = remplirTable("",0);
-			JOptionPane.showMessageDialog(null, scroll);
-			contentPane.repaint();
-
+			DefaultTableModel model = remplirTable("",0);
+			table.setModel(model);
+			
+			//contentPane.repaint();
+			
 		}else if(ev.getSource()== btnModifierTitre){
 			modifierLivre();
 
@@ -160,6 +127,61 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		}
 	}
 
+
+	public void itemStateChanged(ItemEvent e) {
+		if(e.getSource()== cmbCathegorie){
+			DefaultTableModel model = remplirTable((String)cmbCathegorie.getSelectedItem(),0);
+			table.setModel(model);
+
+		}else if(e.getSource()== cmbNumero){
+			
+			//scroll = remplirTable("",Integer.parseInt((String)cmbNumero.getSelectedItem()));
+			DefaultTableModel model = remplirTable("",Integer.parseInt((String)cmbNumero.getSelectedItem()));
+			table.setModel(model);
+			
+
+		}
+//			contentPane.setVisible(true);
+		}
+
+
+	public DefaultTableModel remplirTable(String entree,int cle) {
+		
+		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
+		DefaultTableModel model = new DefaultTableModel(column,0);
+
+		if(cle==0){
+			if(entree.equals("")){
+				for(Livre livre:listeLivres){
+					model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+				}
+			}else{
+				for(Livre livre:listeLivres){
+					String str = livre.getCathegorie();
+					if(entree.equals(str)){
+						model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+
+					}
+				}
+			}
+
+		}else{
+			for(Livre livre:listeLivres){
+				int num = livre.getNum();
+				if(cle ==num){
+					model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+
+				}
+			}
+
+		}
+		//JTable table = new JTable(model);
+		//JPanel pane = new JPanel();
+		//pane.add(table);
+		//JScrollPane scroll = new JScrollPane(table);
+		return model;
+
+	}
 	@Override
 	public void action() {
 		cmbCathegorie.addItemListener(this::itemStateChanged);
@@ -175,7 +197,12 @@ public class frmPrincipal extends JFrame implements actionEvent{
 	 * Launch the application.
 	 */
 
-	public static String[] getListeCBox(String choix){
+	public  String[] getListeCBox(String choix){
+		String[] retour =new String[1];
+		File file = new File("src\\livres.bin");
+		if(!file.exists()){
+		//chargerLivres();
+		}else{
 
 		int num=0;
 		String  titre = "";
@@ -185,7 +212,6 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		String cathegorie="";
 		ArrayList<String>  liste = new ArrayList<>();
 		ArrayList<String>  listeTmp = new ArrayList<>();
-		String[] retour =new String[1];
 		
 		try {
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
@@ -219,8 +245,9 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		for(int i=0;i<listeTmp.size();i++){
 			retour[i]=listeTmp.get(i);
 		}
-
+	}
 		return retour;
+	
 	}
 	public HashMap<Integer, Long> getAddresseMap() {
 		return addresseMap;
@@ -230,6 +257,9 @@ public class frmPrincipal extends JFrame implements actionEvent{
 	}
 
 	public void chargerLivres() {
+		String nomFichier="";
+		final JFileChooser fc = new JFileChooser();
+
 		addresseMap = new HashMap<>();
 		int cle = 0;
 		String  titre = "";
@@ -238,6 +268,7 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		int pages = 0;
 		String cathegorie = "";
 		try {
+	
 				File file = new File("src\\livres.bin");
 				if(file.exists()){
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
@@ -252,11 +283,17 @@ public class frmPrincipal extends JFrame implements actionEvent{
 							cathegorie=donnee.readUTF();
 							addresseMap.put(cle,adr); 
 							Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
-							listeLivires.add(livre);
+							listeLivres.add(livre);
 					}
 					donnee.close();
 				}else{
-					tmpReadTxt = new BufferedReader(new FileReader("src\\livres.txt"));
+					int val_retour = fc.showOpenDialog(this);
+					if (val_retour == JFileChooser.APPROVE_OPTION) {
+						nomFichier= fc.getSelectedFile().getAbsolutePath();
+					 } 
+			
+					tmpReadTxt = new BufferedReader(new InputStreamReader(new java.io.FileInputStream(nomFichier), "UTF8"));
+					//tmpReadTxt = new BufferedReader(new FileReader(fichierTxt));//"src\\livres.txt"
 				    donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					String ligne = tmpReadTxt.readLine();
 					String[] elemt = new String[6];
@@ -280,7 +317,7 @@ public class frmPrincipal extends JFrame implements actionEvent{
 						donnee.writeInt(pages);
 						donnee.writeUTF(cathegorie);
 						Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
-						listeLivires.add(livre);
+						listeLivres.add(livre);
 					
 						ligne = tmpReadTxt.readLine();
 					}	
@@ -309,9 +346,9 @@ public class frmPrincipal extends JFrame implements actionEvent{
 	}
 	public void Suprimer() {
 		int cle = Integer.parseInt(JOptionPane.showInputDialog(null, "Entrez le numero du livre a suprimer :"));
-		for(Livre livre:listeLivires){
+		for(Livre livre:listeLivres){
 			if(livre.getNum()==cle){
-				listeLivires.remove(livre);
+				listeLivres.remove(livre);
 				break;
 			}
 		}
@@ -332,7 +369,7 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		try {
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					donnee.seek(0);
-					for (Livre livre:listeLivires){
+					for (Livre livre:listeLivres){
 						cle = livre.getNum();
 						titre =livre.getTitre();
 						auteur = livre.getAuteur();
@@ -356,7 +393,7 @@ public class frmPrincipal extends JFrame implements actionEvent{
 				
 	}
 	public boolean rechercheCle(int cle) {
-		for(Livre livre:listeLivires){
+		for(Livre livre:listeLivres){
 			if(cle==livre.getNum()){
 				return true;
 			}
@@ -406,7 +443,7 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		}else{
 			ArrayList<String> data = new ArrayList<>(){{add(strCle);add(null);add(null);add(null);add(null);add(null);}};
 			String[] retour = paneString(data);
-			listeLivires.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
+			listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
 				Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
 			sauvgarder();
 			DefaultComboBoxModel model = new DefaultComboBoxModel<>(getListeCBox("num"));
@@ -422,7 +459,7 @@ public class frmPrincipal extends JFrame implements actionEvent{
 				JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +"n' existe pas!!");
 				
 		}else{
-			for(Livre livre:listeLivires){
+			for(Livre livre:listeLivres){
 				if(livre.getNum()==cle){
 					ArrayList<String> data = new ArrayList<>(){{
 						add(strCle);add(livre.getTitre());
@@ -448,16 +485,19 @@ public class frmPrincipal extends JFrame implements actionEvent{
 		
 	}
 	 public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
+		Application frame = new Application();
+		frame.setVisible(true);
+
+/*		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					frmPrincipal frame = new frmPrincipal();
+					Application frame = new Application();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		});
+		});*/
 	}
 	public JScrollPane getScroll() {
 		return scroll;
