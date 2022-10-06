@@ -478,7 +478,7 @@ public String[] paneString(ArrayList<String> data) {
 	
 	}
 	public void chargerLivres() {
-		String nomFichier="";
+		String nomFichier="",pathFichier="";
 		final JFileChooser fc = new JFileChooser();
 
 		addresseMap = new HashMap<>();
@@ -510,47 +510,55 @@ public String[] paneString(ArrayList<String> data) {
 				}else{
 					int val_retour = fc.showOpenDialog(this);
 					if (val_retour == JFileChooser.APPROVE_OPTION) {
-						nomFichier= fc.getSelectedFile().getAbsolutePath();
-					 } 
-			
-					tmpReadTxt = new BufferedReader(new InputStreamReader(new java.io.FileInputStream(nomFichier), "UTF8"));
-					//tmpReadTxt = new BufferedReader(new FileReader(fichierTxt));//"src\\livres.txt"
-				    donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
-					String ligne = tmpReadTxt.readLine();
-					String[] elemt = new String[6];
-					donnee.seek(0);
+						pathFichier= fc.getSelectedFile().getAbsolutePath();
+						nomFichier= fc.getSelectedFile().getName();
+					
+						if(nomFichier.equals("livres.txt")){ 
+					
+							tmpReadTxt = new BufferedReader(new InputStreamReader(new java.io.FileInputStream(pathFichier), "UTF8"));
+							//tmpReadTxt = new BufferedReader(new FileReader(fichierTxt));//"src\\livres.txt"
+							donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+							String ligne = tmpReadTxt.readLine();
+							String[] elemt = new String[6];
+							donnee.seek(0);
 
-					while(ligne != null){
-						elemt = ligne.split(";");
-						cle = Integer.parseInt(elemt[0]);
-						titre =elemt[1];
-						auteur = Integer.parseInt(elemt[2]);
-						annee = Integer.parseInt(elemt[3]);
-						pages = Integer.parseInt(elemt[4]);
-						cathegorie =  elemt[5];
-						Long lng =donnee.getFilePointer();
-						//400;Une aventure d'Astérix le gaulois. Le devin;11;1972;48;bandes dessinées 4+30+4+4+4+20=96
-						addresseMap.put(cle,lng);
-						donnee.writeInt(cle);
-						donnee.writeUTF(titre);
-						donnee.writeInt(auteur);
-						donnee.writeInt(annee);
-						donnee.writeInt(pages);
-						donnee.writeUTF(cathegorie);
-						Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
-						listeLivres.add(livre);
-					
-						ligne = tmpReadTxt.readLine();
-					}	
+							while(ligne != null){
+								elemt = ligne.split(";");
+								cle = Integer.parseInt(elemt[0]);
+								titre =elemt[1];
+								auteur = Integer.parseInt(elemt[2]);
+								annee = Integer.parseInt(elemt[3]);
+								pages = Integer.parseInt(elemt[4]);
+								cathegorie =  elemt[5];
+								Long lng =donnee.getFilePointer();
+								//400;Une aventure d'Astérix le gaulois. Le devin;11;1972;48;bandes dessinées 4+30+4+4+4+20=96
+								addresseMap.put(cle,lng);
+								donnee.writeInt(cle);
+								donnee.writeUTF(titre);
+								donnee.writeInt(auteur);
+								donnee.writeInt(annee);
+								donnee.writeInt(pages);
+								donnee.writeUTF(cathegorie);
+								Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
+								listeLivres.add(livre);
+							
+								ligne = tmpReadTxt.readLine();
+							}	
 
-					donnee.close();	
-					tmpReadTxt.close();	
-					
-					
+							donnee.close();	
+							tmpReadTxt.close();	
+							
+							
+						}else{
+							JOptionPane.showMessageDialog(null, "Le nom du fichier doit etre << livres.txt >>!!");
+							System.exit(0);
+						}
+					}
 				}
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.getMessage();
 		}
+		
 		
 	}
 	public void sauvgarder() {
