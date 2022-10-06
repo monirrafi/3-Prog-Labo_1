@@ -205,11 +205,27 @@ public void Suprimer() {
 			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +"n' existe pas!!");
 			
 	}else{
+		
 		for(Livre livre:listeLivres){
 			if(livre.getNum()==cle){
 				listeLivres.remove(livre);
 				break;
 			}
+		}
+		try {
+			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+			donnee.seek(rechercherAddresse(cle));
+				donnee.readInt();
+				donnee.writeInt(-1);
+				donnee.writeUTF("");
+				donnee.writeInt(0);
+				donnee.writeInt(0);
+				donnee.writeInt(0);
+				donnee.writeUTF("");
+			donnee.close();
+	
+		} catch (Exception e) {
+			e.getMessage();
 		}
 
 		sauvgarder();
@@ -422,12 +438,14 @@ public String[] paneString(ArrayList<String> data) {
 				annee=donnee.readInt();
 				pages=donnee.readInt();
 				cathegorie=donnee.readUTF();
-				if(choix.equals("cathegorie")) {
-					liste.add(cathegorie);
-				}else if(choix.equals("auteur")) {
-					liste.add(String.valueOf(auteur));
-				}else  if(choix.equals("num")) {
-					liste.add(String.valueOf(num));
+				if(num !=-1){
+					if(choix.equals("cathegorie")) {
+						liste.add(cathegorie);
+					}else if(choix.equals("auteur")) {
+						liste.add(String.valueOf(auteur));
+					}else  if(choix.equals("num")) {
+						liste.add(String.valueOf(num));
+					}
 				}
 			}
 			donnee.close();
@@ -595,7 +613,6 @@ public HashMap<Integer, Long> getAddresseMap() {
 
 	public Long rechercherAddresse(int cle) {
 		long adr=-1;
-		System.out.println(addresseMap.size());
 		for(Integer key:addresseMap.keySet()){
 			if(key==cle){
 				adr=addresseMap.get(key);
