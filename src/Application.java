@@ -433,15 +433,16 @@ public String[] paneString(ArrayList<String> data) {
 			donnee.close();
 	
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.getMessage();
 		}
-		
+		//enlever les doublants
 		listeTmp.add(liste.get(0));
 		for(String current:liste){
 			if(listeTmp.indexOf(current)==-1){
 				listeTmp.add(current);
 			}
 		}
+		//les premiers elements de la liste deroulante
 		retour = new String[listeTmp.size()+1];
 		if(choix.equals("cathegorie")) {
 			retour[0]="Cathegorie";
@@ -450,7 +451,7 @@ public String[] paneString(ArrayList<String> data) {
 		}else if(choix.equals("num")) {
 			retour[0]="Numero Livre";
 		}
-
+		//le tableau sans doublant
 		for(int i=0;i<listeTmp.size();i++){
 			retour[i+1]=listeTmp.get(i);
 		}
