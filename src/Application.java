@@ -24,9 +24,9 @@ static JPanel contentPane = new JPanel();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
 
-	JComboBox cmbNumero =new JComboBox(getListeCBox("num"));
-	JComboBox cmbCathegorie = new  JComboBox(getListeCBox("cathegorie"));
-	JComboBox cmbAuteur = new  JComboBox(getListeCBox("auteur"));
+	JComboBox<String> cmbNumero =new JComboBox<>(getListeCBox("num"));
+	JComboBox<String> cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
+	JComboBox<String> cmbAuteur = new  JComboBox<>(getListeCBox("auteur"));
 
 	static JButton btnLivres = new JButton("Afficher les livres");
 	static JButton btnModifierTitre = new JButton("Modifier le titre");
@@ -70,15 +70,11 @@ public Application() {
 		table.setModel(model);
 		scroll = new JScrollPane(table);
 
-		cmbNumero =new JComboBox(getListeCBox("num"));
-		//cmbNumero.setBackground(new Color(123,104,238));
-		//cmbNumero.setForeground(Color.yellow);
-		cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
-		//cmbCathegorie.setBackground(new Color(0,128,0));
-		//cmbCathegorie.setForeground(Color.white);
-		//btnLivres = new JButton("Tous les livres");
-		cmbAuteur = new  JComboBox(getListeCBox("auteur"));
-
+		cmbNumero =new JComboBox<>(getListeCBox("num"));
+		cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
+		cmbAuteur = new  JComboBox<>(getListeCBox("auteur"));
+	
+	
 		btnStyle(btnLivres);
 		btnStyle(btnAjouter);
 		btnStyle(btnSuprimer);
@@ -98,12 +94,12 @@ public Application() {
 		gbc_tlBar.gridy = 0;
 		contentPane.add(tlBar, gbc_tlBar);
 		
-		JLabel lblCath = new JLabel("Cathegorie");
+		//JLabel lblCath = new JLabel("Cathegorie");
 		cmbCathegorie.setBackground(new Color(0,128,0));
 		cmbCathegorie.setForeground(Color.white);
 		cmbCathegorie.setFont( new Font("Serif", Font.BOLD, 20));
 		cmbCathegorie.setOpaque(true);
-		JLabel lblNumero = new JLabel("Numero");
+		//JLabel lblNumero = new JLabel("Numero");
 		cmbNumero.setBackground(new Color(123,104,238));
 		cmbNumero.setForeground(Color.yellow);
 		cmbNumero.setFont( new Font("Serif", Font.BOLD, 20));
