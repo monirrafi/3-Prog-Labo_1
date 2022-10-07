@@ -29,7 +29,7 @@ static JPanel contentPane = new JPanel();
 	JComboBox cmbAuteur = new  JComboBox(getListeCBox("auteur"));
 
 	static JButton btnLivres = new JButton("Afficher les livres");
-	static JButton btnModifierTitre = new JButton("Modifier un livre");
+	static JButton btnModifierTitre = new JButton("Modifier le titre");
 	static JButton btnSuprimer = new JButton("Suprimer un livre");
 	static JButton btnAjouter = new JButton("Ajouter un livre");
 	static JButton btnQuitter = new JButton("Quitter");
@@ -243,14 +243,15 @@ public void ajouter() {
 			
 	}else{
 		ArrayList<String> data = new ArrayList<>(){{add(strCle);add(null);add(null);add(null);add(null);add(null);}};
-		String[] retour = paneString(data);
-		listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
-			Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
+		String[] retour = paneString(data,new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");}});
+		if (retour != null){
+			listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
+				Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
 
-		sauvgarder();
-		DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
-		table.setModel(modelTable);
-
+			sauvgarder();
+			DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
+			table.setModel(modelTable);
+		}	
 	}
 
 }
@@ -264,17 +265,19 @@ public void modifierLivre() {
 		for(Livre livre:listeLivres){
 			if(livre.getNum()==cle){
 				ArrayList<String> data = new ArrayList<>(){{
-					add(strCle);add(livre.getTitre());
-					add(String.valueOf(livre.getAuteur()));add(String.valueOf(livre.getAnnee()));
-					add(String.valueOf(livre.getPages()));add(livre.getCathegorie());}};
-				String[] retour = paneString(data);
-				livre.setNum(cle);
-				livre.setTitre(retour[1]);
-				livre.setAuteur(Integer.parseInt(retour[2]));
-				livre.setAnnee(Integer.parseInt(retour[3]));
-				livre.setPages(Integer.parseInt(retour[4]));
-				livre.setCathegorie(retour[5]);
-				break;
+					add(strCle);add(livre.getTitre());}};
+//					add(String.valueOf(livre.getAuteur()));add(String.valueOf(livre.getAnnee()));
+//					add(String.valueOf(livre.getPages()));add(livre.getCathegorie());
+				String[] retour = paneString(data, new ArrayList<String>(){{add("Numero");add("Titre");}});
+				if (retour != null){
+					livre.setNum(cle);
+					livre.setTitre(retour[1]);
+//					livre.setAuteur(Integer.parseInt(retour[2]));
+//					livre.setAnnee(Integer.parseInt(retour[3]));
+//					livre.setPages(Integer.parseInt(retour[4]));
+//					livre.setCathegorie(retour[5]);
+					break;
+				}
 			}
 
 		}
@@ -293,21 +296,59 @@ public boolean rechercheCle(int cle) {
 	}
 	return false;
 }
-public String[] paneString(ArrayList<String> data) {
+public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps) {
 	String[] retour = new String[6];
 //		if(data.get(0)==null){
-			Dimension d =new Dimension(150,20);
+			Dimension d =new Dimension(350,20);
+			Color cl = new Color(102,178,255);
 			ArrayList<JTextField> listeJtxt = new ArrayList<>();
-			ArrayList<String> listeChamps= new ArrayList<String>();
-			listeChamps = new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");add("Cathegorie");}};
-			
-			JPanel gPane = new JPanel(new GridLayout(listeChamps.size(),1));
+			//ArrayList<String> listeChamps= new ArrayList<String>();
+			//listeChamps = new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");}};
+
+			JPanel panePrincipal = new JPanel(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();	
+			ButtonGroup groupeWeb = new ButtonGroup();
+			if(listeChamps.size()>2){	
+		
+				JLabel lblChoix = new JLabel("                    Choisissez une cathegorie ");
+				JPanel paneRadio = new JPanel(new GridLayout(2,1,0,5));
+				paneRadio.setBackground(cl);
+				JPanel paneElementradio = new JPanel();
+				paneElementradio.setBackground(cl);
+				JRadioButton vide = new JRadioButton("");
+				
+				vide.setBackground(cl);
+				groupeWeb.add(vide);
+				vide.setSelected(true);
+				paneElementradio.add(vide);
+				String[] listeCathegorie = getListeCBox("cathegorie");
+				int longueur = listeCathegorie.length;
+				for(int i=1;i<longueur;i++){
+					JRadioButton rBtn = new JRadioButton(listeCathegorie[i]);
+					rBtn.setBackground(cl);
+					groupeWeb.add(rBtn);
+					paneElementradio.add(rBtn);
+				}
+				paneRadio.add(lblChoix);
+				paneRadio.add(paneElementradio);
+				paneRadio.setPreferredSize(new Dimension(300,10));
+				c.ipadx = 150;      
+				c.ipady = 50;      
+				c.weightx = 0.0;
+				c.gridx = 0;
+				c.gridy = 1;
+				c.gridwidth=2;
+				panePrincipal.add(paneRadio,c);
+			}	
+
+			JPanel gPane = new JPanel(new GridLayout(listeChamps.size(),1,0,5));
+
 			for(int i=0;i<listeChamps.size();i++){
 				JPanel pane = new JPanel();
 				JTextField jtxt = new JTextField(data.get(i));
 				jtxt.setPreferredSize(d);
 				JLabel lbl = new JLabel(listeChamps.get(i));
-				lbl.setPreferredSize(d);
+				lbl.setPreferredSize(new Dimension(50,20));
 				lbl.setLabelFor(jtxt);
 				listeJtxt.add(jtxt);
 				pane.add(lbl);
@@ -315,12 +356,30 @@ public String[] paneString(ArrayList<String> data) {
 				gPane.add(pane);
 
 			}
-			int res = JOptionPane.showConfirmDialog(null,gPane);
+			c.weightx = 0.0;
+			c.gridx = 0;
+			c.gridy = 0;
+			c.gridwidth=1;
+			panePrincipal.add(gPane,c);
+	
+			int res = JOptionPane.showConfirmDialog(null,panePrincipal,"Modification Livre",JOptionPane.YES_NO_CANCEL_OPTION);
 			if(res == JOptionPane.YES_OPTION){
 				for(int i=0;i<listeJtxt.size();i++){
 					retour[i]= listeJtxt.get(i).getText();
 				}
-			} 
+				Enumeration<AbstractButton> allRadioButton=groupeWeb.getElements();  
+				while(allRadioButton.hasMoreElements())  
+				{  
+				   JRadioButton temp=(JRadioButton)allRadioButton.nextElement();  
+				   if(temp.isSelected())  
+				   { 
+						retour[listeJtxt.size()]= temp.getText();  
+				   }  
+				}            
+				
+			}else{
+				retour = null;
+			}  
 		//}
 	
 	
