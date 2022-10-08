@@ -34,6 +34,7 @@ static JPanel contentPane = new JPanel();
 	static JButton btnAjouter = new JButton("Ajouter un livre");
 	static JButton btnQuitter = new JButton("Quitter");
 	static JLabel lblSize;
+	static JPanel imgPane = new JPanel();
 		
 	//private DefaultTableModel model;
 	static GridBagConstraints gbc_tlBar;
@@ -68,10 +69,10 @@ public Application() {
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
 		table.setModel(model);
-		//scroll = new JScrollPane(table);
+		scroll = new JScrollPane(table);
 		
-		JLabel lblImg = new JLabel( new ImageIcon("src\\livre1.jpg"));
-		//scroll.add(lblImg);
+		JLabel lblImg = new JLabel( new ImageIcon("src\\livre2.jpg"));
+		imgPane.add(lblImg);
 
 		cmbNumero =new JComboBox<>(getListeCBox("num"));
 		cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
@@ -134,7 +135,7 @@ public Application() {
 		gbc_tlBar.fill = GridBagConstraints.BOTH;
 		gbc_tlBar.gridx = 0;
 		gbc_tlBar.gridy = 1;
-		contentPane.add(lblImg, gbc_tlBar);
+		contentPane.add(imgPane, gbc_tlBar);
 	}
 
 /*============================================================================================================= */
@@ -143,8 +144,13 @@ public Application() {
 
 	public void actionBtn(ActionEvent ev){
 		if(ev.getSource()== btnLivres){
-			DefaultTableModel model = remplirTable("","0");
-			table.setModel(model);
+			//DefaultTableModel model = remplirTable("","0");
+			//table.setModel(model);
+			//scroll = new JScrollPane(table);
+			//imgPane = new JPanel();
+			JLabel lblImg = new JLabel( new ImageIcon("src\\livre1.jpg"));
+			imgPane.add(lblImg);
+				//imgPane.repaint();
 		
 
 		}else if(ev.getSource()== btnModifierTitre){
