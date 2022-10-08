@@ -69,7 +69,9 @@ public Application() {
 		DefaultTableModel model = new DefaultTableModel(column,0);
 		table.setModel(model);
 		//scroll = new JScrollPane(table);
-		ImageIcon img = new ImageIcon("src\\livre1.png");
+		
+		JLabel lblImg = new JLabel( new ImageIcon("src\\livre1.jpg"));
+		//scroll.add(lblImg);
 
 		cmbNumero =new JComboBox<>(getListeCBox("num"));
 		cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
@@ -132,7 +134,7 @@ public Application() {
 		gbc_tlBar.fill = GridBagConstraints.BOTH;
 		gbc_tlBar.gridx = 0;
 		gbc_tlBar.gridy = 1;
-		contentPane.add(scroll, gbc_tlBar);
+		contentPane.add(lblImg, gbc_tlBar);
 	}
 
 /*============================================================================================================= */
