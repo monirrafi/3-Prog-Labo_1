@@ -34,10 +34,8 @@ static JPanel contentPane = new JPanel();
 	static JButton btnAjouter = new JButton("Ajouter un livre");
 	static JButton btnQuitter = new JButton("Quitter");
 	static JLabel lblSize;
-	static JPanel imgPane = new JPanel();
-		
-	//private DefaultTableModel model;
 	static GridBagConstraints gbc_tlBar;
+	static 	JTableHeader entete;
 
 /*============================================================================================================= */
 /*										Constructeurs																*/
@@ -53,7 +51,7 @@ public Application() {
 		setTitle("Gestion des livres");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(10, 10, 1500, 700);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 0));
+		contentPane.setBorder(new EmptyBorder(5, 5, 1, 0));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[]{266, 62, 0};
@@ -61,19 +59,9 @@ public Application() {
 		gbl_contentPane.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
 		gbl_contentPane.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
-		JTableHeader entete = table.getTableHeader();
-		entete.setFont(new Font("Serif", Font.BOLD, 20));
-		entete.setBackground(new Color(128,128,128));//new Color(105,105,105));
-		entete.setForeground(Color.white);
-		
-		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
-		DefaultTableModel model = new DefaultTableModel(column,0);
-		table.setModel(model);
-		scroll = new JScrollPane(table);
-		
-		JLabel lblImg = new JLabel( new ImageIcon("src\\livre2.jpg"));
-		imgPane.add(lblImg);
 
+		table.setModel(imageTable());
+		scroll = new JScrollPane(table);
 		cmbNumero =new JComboBox<>(getListeCBox("num"));
 		cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
 		cmbAuteur = new  JComboBox<>(getListeCBox("auteur"));
@@ -135,7 +123,7 @@ public Application() {
 		gbc_tlBar.fill = GridBagConstraints.BOTH;
 		gbc_tlBar.gridx = 0;
 		gbc_tlBar.gridy = 1;
-		contentPane.add(imgPane, gbc_tlBar);
+		contentPane.add(scroll, gbc_tlBar);
 	}
 
 /*============================================================================================================= */
@@ -144,14 +132,9 @@ public Application() {
 
 	public void actionBtn(ActionEvent ev){
 		if(ev.getSource()== btnLivres){
-			//DefaultTableModel model = remplirTable("","0");
-			//table.setModel(model);
-			//scroll = new JScrollPane(table);
-			//imgPane = new JPanel();
-			JLabel lblImg = new JLabel( new ImageIcon("src\\livre1.jpg"));
-			imgPane.add(lblImg);
-				//imgPane.repaint();
-		
+			DefaultTableModel model = remplirTable("","0");
+			table.setModel(model);
+			
 
 		}else if(ev.getSource()== btnModifierTitre){
 			modifierLivre();
@@ -400,7 +383,32 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 /*============================================================================================================= */
 /*										Fonctions																*/
 /*============================================================================================================= */
+	public DefaultTableModel imageTable() {
+		entete = table.getTableHeader();
+		entete.setFont(new Font("Serif", Font.BOLD, 20));
+		entete.setBackground(Color.orange);//new Color(128,128,128));//new Color(105,105,105));
+		entete.setForeground(Color.BLACK);
 
+		String[] column = {"Bienvenue au gestion du livres "};
+		table.setRowHeight(558);
+		DefaultTableModel model = new DefaultTableModel(column,0)
+		{
+			
+            public Class getColumnClass(int column)
+            {
+                switch (column)
+                {
+                    case 0: return Icon.class;
+                    default: return super.getColumnClass(column);
+                }
+            }
+        };
+
+		ImageIcon img =  new ImageIcon("src\\livre2.jpg");
+		model.addRow(new Object[]{img});
+
+		return model;	
+	}
 	public void btnStyle(JButton btn){
 		btn.setBackground(new Color(12,128,144));		
 		btn.setForeground(Color.white);
@@ -441,10 +449,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
 		if(entree.equals("Cathegorie") || strCle.equals("Numero Auteur") || strCle.equals("Numero Livre") ){
-			for(Livre livre:listeLivres){
-				model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
-			}
-
+			model = imageTable();
 		}else{
 			int cle = Integer.parseInt(strCle);
 			if(cle==0){
