@@ -29,7 +29,7 @@ static JPanel contentPane = new JPanel();
 	JComboBox<String> cmbAuteur = new  JComboBox<>(getListeCBox("auteur"));
 
 	static JButton btnLivres = new JButton("Afficher les livres");
-	static JButton btnModifierTitre = new JButton("Modifier le titre");
+	static JButton btnModifierTitre = new JButton("Modifier un titre");
 	static JButton btnSuprimer = new JButton("Suprimer un livre");
 	static JButton btnAjouter = new JButton("Ajouter un livre");
 	static JButton btnQuitter = new JButton("Quitter");
@@ -50,7 +50,7 @@ public Application() {
 		contentPane = new JPanel();
 		setTitle("Gestion des livres");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(10, 10, 1500, 700);
+		setBounds(10, 10, 1550, 700);
 		contentPane.setBorder(new EmptyBorder(5, 5, 1, 0));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
@@ -77,7 +77,7 @@ public Application() {
 		
 		tlBar.setToolTipText("Liste des livres");
 		tlBar.setForeground(Color.BLACK);
-		tlBar.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		tlBar.setFont(new Font("Serif", Font.PLAIN, 16));
 		tlBar.setBackground(Color.WHITE);
 		gbc_tlBar = new GridBagConstraints();
 		gbc_tlBar.insets = new Insets(0, 5, 10, 5);
@@ -103,8 +103,10 @@ public Application() {
 		cmbAuteur.setOpaque(true);
 
 		lblSize = new JLabel(" Le nombre des livres est " + listeLivres.size() + " ");
-		lblSize.setFont( new Font("Serif", Font.BOLD, 20)); 
+		lblSize.setFont( new Font("Serif", Font.BOLD, 16)); 
 		lblSize.setSize(new Dimension(350,20));
+
+		
 		tlBar.add(btnLivres);
 		tlBar.add(btnModifierTitre);
 		tlBar.add(btnAjouter);
@@ -187,10 +189,10 @@ public Application() {
 /*										S-A-R     															    */
 /*============================================================================================================= */
 public void Suprimer() {
-	String strCle = JOptionPane.showInputDialog(null, "Entrez le numero du livre a modifier");
+	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à modifier");
 	int cle= Integer.parseInt(strCle);
 	   if(!rechercheCle(cle)){
-			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +"n' existe pas!!");
+			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +" n' existe pas!!");
 			
 	}else{
 		
@@ -217,21 +219,22 @@ public void Suprimer() {
 		}
 
 		sauvgarder();
-		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succes");
-		DefaultTableModel modelTable = remplirTable("","0");
+		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succès");
+		DefaultTableModel modelTable = imageTable();//remplirTable("","0");
 		table.setModel(modelTable);
+
 	}
 	
 }
 public void ajouter() {
-	String strCle = JOptionPane.showInputDialog(null, "Entrez le numero du livre a ajouter");
+	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre a ajouter");
 	int cle= Integer.parseInt(strCle);
 	if(rechercheCle(cle)){
-			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +"  existe deja!!");
+			JOptionPane.showMessageDialog(null, "le livre du numéro "+ cle +"  existe déjà!!");
 			
 	}else{
 		ArrayList<String> data = new ArrayList<>(){{add(strCle);add(null);add(null);add(null);add(null);add(null);}};
-		String[] retour = paneString(data,new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");}},"                         Entrez les informations du votre nouveau livre");
+		String[] retour = paneString(data,new ArrayList<String>(){{add("Numéro");add("Titre");add("Auteur");add("Année");add("Pages");}},"                         Entrez les informations du votre nouveau livre");
 		if (retour != null){
 			listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
 				Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
@@ -244,10 +247,10 @@ public void ajouter() {
 
 }
 public void modifierLivre() {
-	String strCle = JOptionPane.showInputDialog(null, "Entrez le numero du livre a modifier");
+	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre a modifier");
 	int cle= Integer.parseInt(strCle);
 	   if(!rechercheCle(cle)){
-			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +" n' existe pas!!");
+			JOptionPane.showMessageDialog(null, "le livre du numéro "+ cle +" n' existe pas!!");
 			
 	}else{
 		for(Livre livre:listeLivres){
@@ -256,7 +259,7 @@ public void modifierLivre() {
 					add(strCle);add(livre.getTitre());}};
 //					add(String.valueOf(livre.getAuteur()));add(String.valueOf(livre.getAnnee()));
 //					add(String.valueOf(livre.getPages()));add(livre.getCathegorie());
-				String[] retour = paneString(data, new ArrayList<String>(){{add("Numero");add("Titre");}},"                          Modifier le titre");
+				String[] retour = paneString(data, new ArrayList<String>(){{add("Numéro");add("Titre");}},"                          Modifier le titre");
 				if (retour != null){
 					livre.setNum(cle);
 					livre.setTitre(retour[1]);
@@ -389,7 +392,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		entete.setBackground(Color.orange);//new Color(128,128,128));//new Color(105,105,105));
 		entete.setForeground(Color.BLACK);
 
-		String[] column = {"Bienvenue au gestion du livres "};
+		String[] column = {"Bienvenue à l'application de gestion des livres "};
 		table.setRowHeight(558);
 		DefaultTableModel model = new DefaultTableModel(column,0)
 		{
@@ -410,6 +413,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		return model;	
 	}
 	public void btnStyle(JButton btn){
+		btn.setSize(new Dimension(200,20));
 		btn.setBackground(new Color(12,128,144));		
 		btn.setForeground(Color.white);
 		btn.setFont( new Font("Serif", Font.BOLD, 18));
@@ -448,8 +452,10 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
-		if(entree.equals("Cathegorie") || strCle.equals("Numero Auteur") || strCle.equals("Numero Livre") ){
-			model = imageTable();
+		if(entree.equals("Choisissez Cathegorie") || strCle.equals("Choisissez Auteur") || strCle.equals("Choisissez Livre") ){
+			for(Livre livre:listeLivres){
+				model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+			}
 		}else{
 			int cle = Integer.parseInt(strCle);
 			if(cle==0){
@@ -537,11 +543,11 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		//les premiers elements de la liste deroulante
 		retour = new String[listeTmp.size()+1];
 		if(choix.equals("cathegorie")) {
-			retour[0]="Cathegorie";
+			retour[0]="Choisissez Cathegorie";
 		}else if(choix.equals("auteur")) {
-			retour[0]="Numero Auteur";
+			retour[0]="Choisissez Auteur";
 		}else if(choix.equals("num")) {
-			retour[0]="Numero Livre";
+			retour[0]="Choisissez Livre";
 		}
 		//le tableau sans doublant
 		for(int i=0;i<listeTmp.size();i++){
