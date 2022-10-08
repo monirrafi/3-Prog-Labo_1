@@ -68,7 +68,8 @@ public Application() {
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
 		table.setModel(model);
-		scroll = new JScrollPane(table);
+		//scroll = new JScrollPane(table);
+		ImageIcon img = new ImageIcon("src\\livre1.png");
 
 		cmbNumero =new JComboBox<>(getListeCBox("num"));
 		cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
@@ -239,7 +240,7 @@ public void ajouter() {
 			
 	}else{
 		ArrayList<String> data = new ArrayList<>(){{add(strCle);add(null);add(null);add(null);add(null);add(null);}};
-		String[] retour = paneString(data,new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");}});
+		String[] retour = paneString(data,new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");}},"                         Entrez les informations du votre nouveau livre");
 		if (retour != null){
 			listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
 				Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
@@ -264,7 +265,7 @@ public void modifierLivre() {
 					add(strCle);add(livre.getTitre());}};
 //					add(String.valueOf(livre.getAuteur()));add(String.valueOf(livre.getAnnee()));
 //					add(String.valueOf(livre.getPages()));add(livre.getCathegorie());
-				String[] retour = paneString(data, new ArrayList<String>(){{add("Numero");add("Titre");}});
+				String[] retour = paneString(data, new ArrayList<String>(){{add("Numero");add("Titre");}},"                          Modifier le titre");
 				if (retour != null){
 					livre.setNum(cle);
 					livre.setTitre(retour[1]);
@@ -292,7 +293,7 @@ public boolean rechercheCle(int cle) {
 	}
 	return false;
 }
-public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps) {
+public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,String titre) {
 	String[] retour = new String[6];
 //		if(data.get(0)==null){
 			Dimension d =new Dimension(350,20);
@@ -303,7 +304,11 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps)
 
 			JPanel panePrincipal = new JPanel(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();	
-			ButtonGroup groupeWeb = new ButtonGroup();
+			JLabel lblTitre = new JLabel(titre);
+			lblTitre.setFont(new Font("Serif", Font.BOLD, 20));
+//			entete.setBackground(new Color(128,128,128));//new Color(105,105,105));
+			lblTitre.setForeground(Color.blue);
+				ButtonGroup groupeWeb = new ButtonGroup();
 			if(listeChamps.size()>2){	
 		
 				JLabel lblChoix = new JLabel("                    Choisissez une cathegorie ");
@@ -337,8 +342,9 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps)
 				panePrincipal.add(paneRadio,c);
 			}	
 
-			JPanel gPane = new JPanel(new GridLayout(listeChamps.size(),1,0,5));
-
+			JPanel gPane = new JPanel(new GridLayout(listeChamps.size()+1,1,0,5));
+			gPane.add(lblTitre);
+			
 			for(int i=0;i<listeChamps.size();i++){
 				JPanel pane = new JPanel();
 				JTextField jtxt = new JTextField(data.get(i));
