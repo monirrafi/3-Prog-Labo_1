@@ -134,8 +134,8 @@ public Application() {
 
 	public void actionBtn(ActionEvent ev){
 		if(ev.getSource()== btnLivres){
-			DefaultTableModel model = remplirTable("","0");
-			table.setModel(model);
+			//DefaultTableModel model = remplirTable("","0");
+			table.setModel(remplirTable("","0"));
 			
 
 		}else if(ev.getSource()== btnModifierTitre){
