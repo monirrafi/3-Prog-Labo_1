@@ -50,7 +50,7 @@ public Application() {
 		contentPane = new JPanel();
 		setTitle("Gestion des livres");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(10, 10, 1550, 700);
+		setBounds(0, 0, 1550, 700);
 		contentPane.setBorder(new EmptyBorder(5, 5, 1, 0));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
