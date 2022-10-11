@@ -24,19 +24,18 @@ static JPanel contentPane = new JPanel();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
 
-	JComboBox cmbNumero =new JComboBox(getListeCBox("num"));
-	JComboBox cmbCathegorie = new  JComboBox(getListeCBox("cathegorie"));
-	JComboBox cmbAuteur = new  JComboBox(getListeCBox("auteur"));
+	JComboBox<String> cmbNumero =new JComboBox<>(getListeCBox("num"));
+	JComboBox<String> cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
+	JComboBox<String> cmbAuteur = new  JComboBox<>(getListeCBox("auteur"));
 
 	static JButton btnLivres = new JButton("Afficher les livres");
-	static JButton btnModifierTitre = new JButton("Modifier un livre");
+	static JButton btnModifierTitre = new JButton("Modifier un titre");
 	static JButton btnSuprimer = new JButton("Suprimer un livre");
 	static JButton btnAjouter = new JButton("Ajouter un livre");
 	static JButton btnQuitter = new JButton("Quitter");
 	static JLabel lblSize;
-		
-	//private DefaultTableModel model;
 	static GridBagConstraints gbc_tlBar;
+	static 	JTableHeader entete;
 
 /*============================================================================================================= */
 /*										Constructeurs																*/
@@ -51,8 +50,8 @@ public Application() {
 		contentPane = new JPanel();
 		setTitle("Gestion des livres");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(10, 10, 1500, 700);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 0));
+		setBounds(0, 0, 1550, 700);
+		contentPane.setBorder(new EmptyBorder(5, 5, 1, 0));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[]{266, 62, 0};
@@ -60,25 +59,14 @@ public Application() {
 		gbl_contentPane.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
 		gbl_contentPane.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
-		JTableHeader entete = table.getTableHeader();
-		entete.setFont(new Font("Serif", Font.BOLD, 20));
-		entete.setBackground(new Color(128,128,128));//new Color(105,105,105));
-		entete.setForeground(Color.white);
-		
-		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
-		DefaultTableModel model = new DefaultTableModel(column,0);
-		table.setModel(model);
+
+		table.setModel(imageTable());
 		scroll = new JScrollPane(table);
-
-		cmbNumero =new JComboBox(getListeCBox("num"));
-		//cmbNumero.setBackground(new Color(123,104,238));
-		//cmbNumero.setForeground(Color.yellow);
-		cmbCathegorie = new JComboBox(getListeCBox("cathegorie"));
-		//cmbCathegorie.setBackground(new Color(0,128,0));
-		//cmbCathegorie.setForeground(Color.white);
-		//btnLivres = new JButton("Tous les livres");
-		cmbAuteur = new  JComboBox(getListeCBox("auteur"));
-
+		cmbNumero =new JComboBox<>(getListeCBox("num"));
+		cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
+		cmbAuteur = new  JComboBox<>(getListeCBox("auteur"));
+	
+	
 		btnStyle(btnLivres);
 		btnStyle(btnAjouter);
 		btnStyle(btnSuprimer);
@@ -89,7 +77,7 @@ public Application() {
 		
 		tlBar.setToolTipText("Liste des livres");
 		tlBar.setForeground(Color.BLACK);
-		tlBar.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		tlBar.setFont(new Font("Serif", Font.PLAIN, 16));
 		tlBar.setBackground(Color.WHITE);
 		gbc_tlBar = new GridBagConstraints();
 		gbc_tlBar.insets = new Insets(0, 5, 10, 5);
@@ -98,12 +86,12 @@ public Application() {
 		gbc_tlBar.gridy = 0;
 		contentPane.add(tlBar, gbc_tlBar);
 		
-		JLabel lblCath = new JLabel("Cathegorie");
+		//JLabel lblCath = new JLabel("Cathegorie");
 		cmbCathegorie.setBackground(new Color(0,128,0));
 		cmbCathegorie.setForeground(Color.white);
 		cmbCathegorie.setFont( new Font("Serif", Font.BOLD, 20));
 		cmbCathegorie.setOpaque(true);
-		JLabel lblNumero = new JLabel("Numero");
+		//JLabel lblNumero = new JLabel("Numero");
 		cmbNumero.setBackground(new Color(123,104,238));
 		cmbNumero.setForeground(Color.yellow);
 		cmbNumero.setFont( new Font("Serif", Font.BOLD, 20));
@@ -115,8 +103,10 @@ public Application() {
 		cmbAuteur.setOpaque(true);
 
 		lblSize = new JLabel(" Le nombre des livres est " + listeLivres.size() + " ");
-		lblSize.setFont( new Font("Serif", Font.BOLD, 20)); 
+		lblSize.setFont( new Font("Serif", Font.BOLD, 16)); 
 		lblSize.setSize(new Dimension(350,20));
+
+		
 		tlBar.add(btnLivres);
 		tlBar.add(btnModifierTitre);
 		tlBar.add(btnAjouter);
@@ -146,7 +136,7 @@ public Application() {
 		if(ev.getSource()== btnLivres){
 			DefaultTableModel model = remplirTable("","0");
 			table.setModel(model);
-		
+			
 
 		}else if(ev.getSource()== btnModifierTitre){
 			modifierLivre();
@@ -199,10 +189,10 @@ public Application() {
 /*										S-A-R     															    */
 /*============================================================================================================= */
 public void Suprimer() {
-	String strCle = JOptionPane.showInputDialog(null, "Entrez le numero du livre a modifier");
+	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à modifier");
 	int cle= Integer.parseInt(strCle);
 	   if(!rechercheCle(cle)){
-			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +"n' existe pas!!");
+			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +" n' existe pas!!");
 			
 	}else{
 		
@@ -229,52 +219,56 @@ public void Suprimer() {
 		}
 
 		sauvgarder();
-		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succes");
-		DefaultTableModel modelTable = remplirTable("","0");
+		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succès");
+		DefaultTableModel modelTable = imageTable();//remplirTable("","0");
 		table.setModel(modelTable);
+
 	}
 	
 }
 public void ajouter() {
-	String strCle = JOptionPane.showInputDialog(null, "Entrez le numero du livre a ajouter");
+	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre a ajouter");
 	int cle= Integer.parseInt(strCle);
 	if(rechercheCle(cle)){
-			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +"  existe deja!!");
+			JOptionPane.showMessageDialog(null, "le livre du numéro "+ cle +"  existe déjà!!");
 			
 	}else{
 		ArrayList<String> data = new ArrayList<>(){{add(strCle);add(null);add(null);add(null);add(null);add(null);}};
-		String[] retour = paneString(data);
-		listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
-			Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
+		String[] retour = paneString(data,new ArrayList<String>(){{add("Numéro");add("Titre");add("Auteur");add("Année");add("Pages");}},"                         Entrez les informations du votre nouveau livre");
+		if (retour != null){
+			listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
+				Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
 
-		sauvgarder();
-		DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
-		table.setModel(modelTable);
-
+			sauvgarder();
+			DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
+			table.setModel(modelTable);
+		}	
 	}
 
 }
 public void modifierLivre() {
-	String strCle = JOptionPane.showInputDialog(null, "Entrez le numero du livre a modifier");
+	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre a modifier");
 	int cle= Integer.parseInt(strCle);
 	   if(!rechercheCle(cle)){
-			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +" n' existe pas!!");
+			JOptionPane.showMessageDialog(null, "le livre du numéro "+ cle +" n' existe pas!!");
 			
 	}else{
 		for(Livre livre:listeLivres){
 			if(livre.getNum()==cle){
 				ArrayList<String> data = new ArrayList<>(){{
-					add(strCle);add(livre.getTitre());
-					add(String.valueOf(livre.getAuteur()));add(String.valueOf(livre.getAnnee()));
-					add(String.valueOf(livre.getPages()));add(livre.getCathegorie());}};
-				String[] retour = paneString(data);
-				livre.setNum(cle);
-				livre.setTitre(retour[1]);
-				livre.setAuteur(Integer.parseInt(retour[2]));
-				livre.setAnnee(Integer.parseInt(retour[3]));
-				livre.setPages(Integer.parseInt(retour[4]));
-				livre.setCathegorie(retour[5]);
-				break;
+					add(strCle);add(livre.getTitre());}};
+//					add(String.valueOf(livre.getAuteur()));add(String.valueOf(livre.getAnnee()));
+//					add(String.valueOf(livre.getPages()));add(livre.getCathegorie());
+				String[] retour = paneString(data, new ArrayList<String>(){{add("Numéro");add("Titre");}},"                          Modifier le titre");
+				if (retour != null){
+					livre.setNum(cle);
+					livre.setTitre(retour[1]);
+//					livre.setAuteur(Integer.parseInt(retour[2]));
+//					livre.setAnnee(Integer.parseInt(retour[3]));
+//					livre.setPages(Integer.parseInt(retour[4]));
+//					livre.setCathegorie(retour[5]);
+					break;
+				}
 			}
 
 		}
@@ -293,21 +287,64 @@ public boolean rechercheCle(int cle) {
 	}
 	return false;
 }
-public String[] paneString(ArrayList<String> data) {
+public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,String titre) {
 	String[] retour = new String[6];
 //		if(data.get(0)==null){
-			Dimension d =new Dimension(150,20);
+			Dimension d =new Dimension(350,20);
+			Color cl = new Color(102,178,255);
 			ArrayList<JTextField> listeJtxt = new ArrayList<>();
-			ArrayList<String> listeChamps= new ArrayList<String>();
-			listeChamps = new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");add("Cathegorie");}};
+			//ArrayList<String> listeChamps= new ArrayList<String>();
+			//listeChamps = new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");}};
+
+			JPanel panePrincipal = new JPanel(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();	
+			JLabel lblTitre = new JLabel(titre);
+			lblTitre.setFont(new Font("Serif", Font.BOLD, 20));
+//			entete.setBackground(new Color(128,128,128));//new Color(105,105,105));
+			lblTitre.setForeground(Color.blue);
+				ButtonGroup groupeWeb = new ButtonGroup();
+			if(listeChamps.size()>2){	
+		
+				JLabel lblChoix = new JLabel("                    Choisissez une cathegorie ");
+				JPanel paneRadio = new JPanel(new GridLayout(2,1,0,5));
+				paneRadio.setBackground(cl);
+				JPanel paneElementradio = new JPanel();
+				paneElementradio.setBackground(cl);
+				JRadioButton vide = new JRadioButton("");
+				
+				vide.setBackground(cl);
+				groupeWeb.add(vide);
+				vide.setSelected(true);
+				paneElementradio.add(vide);
+				String[] listeCathegorie = getListeCBox("cathegorie");
+				int longueur = listeCathegorie.length;
+				for(int i=1;i<longueur;i++){
+					JRadioButton rBtn = new JRadioButton(listeCathegorie[i]);
+					rBtn.setBackground(cl);
+					groupeWeb.add(rBtn);
+					paneElementradio.add(rBtn);
+				}
+				paneRadio.add(lblChoix);
+				paneRadio.add(paneElementradio);
+				paneRadio.setPreferredSize(new Dimension(300,10));
+				c.ipadx = 150;      
+				c.ipady = 50;      
+				c.weightx = 0.0;
+				c.gridx = 0;
+				c.gridy = 1;
+				c.gridwidth=2;
+				panePrincipal.add(paneRadio,c);
+			}	
+
+			JPanel gPane = new JPanel(new GridLayout(listeChamps.size()+1,1,0,5));
+			gPane.add(lblTitre);
 			
-			JPanel gPane = new JPanel(new GridLayout(listeChamps.size(),1));
 			for(int i=0;i<listeChamps.size();i++){
 				JPanel pane = new JPanel();
 				JTextField jtxt = new JTextField(data.get(i));
 				jtxt.setPreferredSize(d);
 				JLabel lbl = new JLabel(listeChamps.get(i));
-				lbl.setPreferredSize(d);
+				lbl.setPreferredSize(new Dimension(50,20));
 				lbl.setLabelFor(jtxt);
 				listeJtxt.add(jtxt);
 				pane.add(lbl);
@@ -315,12 +352,30 @@ public String[] paneString(ArrayList<String> data) {
 				gPane.add(pane);
 
 			}
-			int res = JOptionPane.showConfirmDialog(null,gPane);
+			c.weightx = 0.0;
+			c.gridx = 0;
+			c.gridy = 0;
+			c.gridwidth=1;
+			panePrincipal.add(gPane,c);
+	
+			int res = JOptionPane.showConfirmDialog(null,panePrincipal,"Modification Livre",JOptionPane.YES_NO_CANCEL_OPTION);
 			if(res == JOptionPane.YES_OPTION){
 				for(int i=0;i<listeJtxt.size();i++){
 					retour[i]= listeJtxt.get(i).getText();
 				}
-			} 
+				Enumeration<AbstractButton> allRadioButton=groupeWeb.getElements();  
+				while(allRadioButton.hasMoreElements())  
+				{  
+				   JRadioButton temp=(JRadioButton)allRadioButton.nextElement();  
+				   if(temp.isSelected())  
+				   { 
+						retour[listeJtxt.size()]= temp.getText();  
+				   }  
+				}            
+				
+			}else{
+				retour = null;
+			}  
 		//}
 	
 	
@@ -331,8 +386,34 @@ public String[] paneString(ArrayList<String> data) {
 /*============================================================================================================= */
 /*										Fonctions																*/
 /*============================================================================================================= */
+	public DefaultTableModel imageTable() {
+		entete = table.getTableHeader();
+		entete.setFont(new Font("Serif", Font.BOLD, 20));
+		entete.setBackground(Color.orange);//new Color(128,128,128));//new Color(105,105,105));
+		entete.setForeground(Color.BLACK);
 
+		String[] column = {"Bienvenue à l'application de gestion des livres "};
+		table.setRowHeight(558);
+		DefaultTableModel model = new DefaultTableModel(column,0)
+		{
+			
+            public Class getColumnClass(int column)
+            {
+                switch (column)
+                {
+                    case 0: return Icon.class;
+                    default: return super.getColumnClass(column);
+                }
+            }
+        };
+
+		ImageIcon img =  new ImageIcon("src\\livre2.jpg");
+		model.addRow(new Object[]{img});
+
+		return model;	
+	}
 	public void btnStyle(JButton btn){
+		btn.setSize(new Dimension(200,20));
 		btn.setBackground(new Color(12,128,144));		
 		btn.setForeground(Color.white);
 		btn.setFont( new Font("Serif", Font.BOLD, 18));
@@ -371,11 +452,10 @@ public String[] paneString(ArrayList<String> data) {
 		
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
-		if(entree.equals("Cathegorie") || strCle.equals("Numero Auteur") || strCle.equals("Numero Livre") ){
+		if(entree.equals("Choisissez Cathegorie") || strCle.equals("Choisissez Auteur") || strCle.equals("Choisissez Livre") ){
 			for(Livre livre:listeLivres){
 				model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
 			}
-
 		}else{
 			int cle = Integer.parseInt(strCle);
 			if(cle==0){
@@ -463,11 +543,11 @@ public String[] paneString(ArrayList<String> data) {
 		//les premiers elements de la liste deroulante
 		retour = new String[listeTmp.size()+1];
 		if(choix.equals("cathegorie")) {
-			retour[0]="Cathegorie";
+			retour[0]="Choisissez Cathegorie";
 		}else if(choix.equals("auteur")) {
-			retour[0]="Numero Auteur";
+			retour[0]="Choisissez Auteur";
 		}else if(choix.equals("num")) {
-			retour[0]="Numero Livre";
+			retour[0]="Choisissez Livre";
 		}
 		//le tableau sans doublant
 		for(int i=0;i<listeTmp.size();i++){
