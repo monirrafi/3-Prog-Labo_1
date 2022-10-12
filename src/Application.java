@@ -6,6 +6,7 @@ import javax.swing.table.TableColumnModel;
 
 import java.awt.*;
 import java.io.*;
+import java.text.Normalizer;
 import java.util.*;
 import java.awt.event.*;
 
@@ -19,7 +20,7 @@ static JPanel contentPane = new JPanel();
 	private JTable table = new JTable();
 
 	static String nomFichier;
-	static HashMap<Integer,Long> addresseMap;
+	static HashMap<Integer,Long[]> addresseMap;
 	static ArrayList<Livre> listeLivres = new ArrayList<>();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
@@ -191,36 +192,47 @@ public Application() {
 public void Suprimer() {
 	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à modifier");
 	int cle= Integer.parseInt(strCle);
-	   if(!rechercheCle(cle)){
+	Livre livreSprimer = new Livre();
+
+	if(!rechercheCle(cle)){
 			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +" n' existe pas!!");
 			
 	}else{
 		
 		for(Livre livre:listeLivres){
 			if(livre.getNum()==cle){
+				livreSprimer = livre;
 				listeLivres.remove(livre);
 				break;
 			}
 		}
 		try {
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
-			donnee.seek(rechercherAddresse(cle));
+			long adr = rechercherAddresse(cle);
+			
+			donnee.seek(adr);
 				donnee.readInt();
-				donnee.writeInt(-1);
+				donnee.writeInt(-1*cle);
 				donnee.writeUTF("");
 				donnee.writeInt(0);
 				donnee.writeInt(0);
 				donnee.writeInt(0);
 				donnee.writeUTF("");
 			donnee.close();
+			Long[] adrInfo = {adr,tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie()),(long) 0};
+			addresseMap.put(-1*cle, adrInfo);
+			//addresseMap.get(cle)[1]=tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie());
+			//addresseMap.get(cle)[2]=(long) 0;
+			System.out.println(-1*cle + " " + addresseMap.get(-1*cle)[0] + " " + addresseMap.get(-1*cle)[1] + " " + addresseMap.get(-1*cle)[2]);
+			
 	
 		} catch (Exception e) {
 			e.getMessage();
 		}
 
-		sauvgarder();
+		//sauvgarder();
 		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succès");
-		DefaultTableModel modelTable = imageTable();//remplirTable("","0");
+		DefaultTableModel modelTable = remplirTable("","0");
 		table.setModel(modelTable);
 
 	}
@@ -236,8 +248,30 @@ public void ajouter() {
 		ArrayList<String> data = new ArrayList<>(){{add(strCle);add(null);add(null);add(null);add(null);add(null);}};
 		String[] retour = paneString(data,new ArrayList<String>(){{add("Numéro");add("Titre");add("Auteur");add("Année");add("Pages");}},"                         Entrez les informations du votre nouveau livre");
 		if (retour != null){
+
 			listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
 				Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
+				try {
+					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+					long adrVide = rechercherAddresseVide(retour[1], retour[5]);
+					if(adrVide != -1){
+						donnee.seek(adrVide);
+					}else{
+						donnee.seek(donnee.length());
+					}
+						donnee.readInt();
+						donnee.writeInt(Integer.parseInt(retour[0]));
+						donnee.writeUTF(retour[1]);
+						donnee.writeInt(Integer.parseInt(retour[2]));
+						donnee.writeInt(Integer.parseInt(retour[3]));
+						donnee.writeInt(Integer.parseInt(retour[4]));
+						donnee.writeUTF(retour[5]);
+					donnee.close();
+			
+				} catch (Exception e) {
+					e.getMessage();
+				}
+		
 
 			sauvgarder();
 			DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
@@ -574,15 +608,18 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 				if(file.exists()){
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					donnee.seek(0);
+					long debut=0;
 					for (int i=0;i<donnee.length();i++){
 							long adr = donnee.getFilePointer();
+							Long[] infoAdr = {adr,adr-debut,(long) 1};
+							debut =adr;
 							cle = donnee.readInt();
 							titre=donnee.readUTF();
 							auteur=donnee.readInt();
 							annee=donnee.readInt();
 							pages=donnee.readInt();
 							cathegorie=donnee.readUTF();
-							addresseMap.put(cle,adr); 
+							addresseMap.put(cle,infoAdr); 
 							Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
 							listeLivres.add(livre);
 					}
@@ -601,7 +638,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 							String ligne = tmpReadTxt.readLine();
 							String[] elemt = new String[6];
 							donnee.seek(0);
-
+							long debut=0;
 							while(ligne != null){
 								elemt = ligne.split(";");
 								cle = Integer.parseInt(elemt[0]);
@@ -610,9 +647,11 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 								annee = Integer.parseInt(elemt[3]);
 								pages = Integer.parseInt(elemt[4]);
 								cathegorie =  elemt[5];
-								Long lng =donnee.getFilePointer();
-								//400;Une aventure d'Astérix le gaulois. Le devin;11;1972;48;bandes dessinées 4+30+4+4+4+20=96
-								addresseMap.put(cle,lng);
+								//Long lng =donnee.getFilePointer();
+								long adr = donnee.getFilePointer();
+								Long[] infoAdr = {adr,adr-debut,(long) 1};
+								debut =adr;
+								addresseMap.put(cle,infoAdr);
 								donnee.writeInt(cle);
 								donnee.writeUTF(titre);
 								donnee.writeInt(auteur);
@@ -652,6 +691,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		try {
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					donnee.seek(0);
+					long debut=0;
 					for (Livre livre:listeLivres){
 						cle = livre.getNum();
 						titre =livre.getTitre();
@@ -659,9 +699,13 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 						annee = livre.getAnnee();
 						pages = livre.getPages();
 						cathegorie =  livre.getCathegorie();
-						Long lng =donnee.getFilePointer();
+						//Long lng =donnee.getFilePointer();
+						
+						long adr = donnee.getFilePointer();
+						Long[] infoAdr = {adr,adr-debut,(long) 1};
+						debut =adr;
 
-						addresseMap.put(cle,lng);
+						addresseMap.put(cle,infoAdr);
 						donnee.writeInt(cle);
 						donnee.writeUTF(titre);
 						donnee.writeInt(auteur);
@@ -692,10 +736,10 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 /*										geters et seters																*/
 /*============================================================================================================= */
 
-public HashMap<Integer, Long> getAddresseMap() {
+public HashMap<Integer, Long[]> getAddresseMap() {
 		return addresseMap;
 	}
-	public void setAddresseMap(HashMap<Integer, Long> addresseMap) {
+	public void setAddresseMap(HashMap<Integer, Long[]> addresseMap) {
 		this.addresseMap = addresseMap;
 	}
 
@@ -703,13 +747,44 @@ public HashMap<Integer, Long> getAddresseMap() {
 		long adr=-1;
 		for(Integer key:addresseMap.keySet()){
 			if(key==cle){
-				adr=addresseMap.get(key);
+				adr=addresseMap.get(key)[0];
 				break;
 			}
 		} 
 		return adr;
 		
 	}
+	public long rechercherAddresseVide(String titre, String cathegorie) {
+		long adr=-1;
+		for(Long[] val:addresseMap.values()){
+			System.out.println(val[0] + " " + val[2] + " " + val[1] + " " + tailleMot(titre, cathegorie));
+			//System.out.println(-1*cle + " " + addresseMap.get(-1*cle)[0] + " " + addresseMap.get(-1*cle)[1] + " " + addresseMap.get(-1*cle)[2]);
+			if(val[2]==0 && val[1]>= tailleMot(titre, cathegorie)){
+				adr=val[0];
+				break;
+			}
+		} 
+		return adr;
+		
+	}
+	public static boolean avecAccent(String chaine){
+    String strTemp = Normalizer.normalize(chaine, Normalizer.Form.NFD);
+    if(chaine.equals(strTemp)){
+      return false;
+    }else{
+      return true;
+    }
+    }
+	public long tailleMot(String titre,String cathegorie) {
+		long taille = titre.length() + cathegorie.length() + 20;
+		if(avecAccent(titre) && avecAccent(cathegorie)){
+			taille+=2;
+		}else if(avecAccent(titre) || avecAccent(cathegorie)){
+			taille+=1;
+		}
+		return taille;
+	}
+
 	 public static void main(String[] args) {
 		Application frame = new Application();
 		frame.setVisible(true);
