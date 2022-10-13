@@ -20,8 +20,8 @@ static JPanel contentPane = new JPanel();
 	private JTable table = new JTable();
 
 	static String nomFichier;
-	static HashMap<Integer,Long[]> addresseMap;
-	static ArrayList<Livre> listeLivres = new ArrayList<>();
+	static HashMap<Integer,Long[]> addresseMap = new HashMap<>();
+	//static ArrayList<Livre> listeLivres = new ArrayList<>();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
 
@@ -103,7 +103,7 @@ static JPanel contentPane = new JPanel();
 		cmbAuteur.setFont( new Font("Serif", Font.BOLD, 20));
 		cmbAuteur.setOpaque(true);
 
-		lblSize = new JLabel(" Le nombre des livres est " + listeLivres.size() + " ");
+		lblSize = new JLabel(" Le nombre des livres est " + remplirArrayliste().size() + " ");
 		lblSize.setFont( new Font("Serif", Font.BOLD, 16)); 
 		lblSize.setSize(new Dimension(350,20));
 
@@ -209,6 +209,8 @@ public void Suprimer() {
 		try {
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 			long adr = rechercherAddresse(cle);
+			Long[] adrInfo = {addresseMap.get(cle)[0],addresseMap.get(cle)[1],(long) 0};
+			addresseMap.put(-1*cle, adrInfo);
 			
 			donnee.seek(adr);
 				donnee.writeInt(-1*cle);
@@ -218,22 +220,12 @@ public void Suprimer() {
 				donnee.writeInt(0);
 				donnee.writeUTF("");
 			donnee.close();
+			addresseMap.remove(cle);
+
 			//Long[] adrInfo = {adr,tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie()),(long) 0};
-			Long[] adrInfo = {addresseMap.get(cle)[0],addresseMap.get(cle)[1],(long) 0};
-			addresseMap.put(-1*cle, adrInfo);
 			//addresseMap.get(cle)[1]=tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie());
 			//addresseMap.get(cle)[2]=(long) 0;
-			System.out.println("=========Suprimer=======");
 
-			for(Long[] val:addresseMap.values()){
-				System.out.println(val[0] + " " + val[1] + " " + val[2]);
-				
-		}
-		for(Integer key:addresseMap.keySet()){	
-			System.out.println(key);
-	
-		} 
-		System.out.println("====================");
 				
 	
 		} catch (Exception e) {
@@ -250,7 +242,19 @@ public void Suprimer() {
 		DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
 		cmbCathegorie.removeAll();
 		cmbCathegorie.setModel(modelCath);
-		lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");
+		lblSize.setText(" Le nombre des livres est " + remplirArrayliste().size() + " ");
+		System.out.println("=========Suprimer=======");
+		for(Long[] val:addresseMap.values()){
+				System.out.println(val[0] + " " + val[1] + " " + val[2]);
+				
+		}
+		for(Integer key:addresseMap.keySet()){	
+			System.out.println(key);
+	
+		} 
+		System.out.println("====================");
+	
+	
 
 		//sauvgarder();
 		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succès");
@@ -317,7 +321,7 @@ public void ajouter() {
 			DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
 			cmbCathegorie.removeAll();
 			cmbCathegorie.setModel(modelCath);
-			lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");
+			lblSize.setText(" Le nombre des livres est " + remplirArrayliste().size() + " ");
 
 			//sauvgarder();
 			DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
@@ -327,6 +331,7 @@ public void ajouter() {
 
 }
 public void modifierLivre() {
+	ArrayList<Livre> listeLivres = remplirArrayliste();
 	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre a modifier");
 	int cle= Integer.parseInt(strCle);
 	   if(!rechercheCle(cle)){
@@ -596,6 +601,9 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 	}
 
 	public  String[] getListeCBox(String choix){
+
+		chargerLivres();
+	
 		String[] retour =new String[1];
 		File file = new File("src\\livres.bin");
 		if(file.exists()){
@@ -611,8 +619,10 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		
 		try {
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
-			donnee.seek(0);
-			for (int i=0;i<donnee.length();i++){
+			//donnee.seek(0);
+			//for (int i=0;i<donnee.length();i++){
+			for(Long[] val:addresseMap.values()){
+				donnee.seek(val[0]);
 				num = donnee.readInt();
 				titre=donnee.readUTF();
 				auteur=donnee.readInt();
@@ -655,6 +665,8 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 			retour[i+1]=listeTmp.get(i);
 		}
 	}
+
+
 		return retour;
 	
 	}
@@ -662,7 +674,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		String nomFichier="",pathFichier="";
 		final JFileChooser fc = new JFileChooser();
 
-		addresseMap = new HashMap<>();
+		//addresseMap = new HashMap<>();
 		int cle = 0;
 		String  titre = "";
 		int auteur = 0;
@@ -673,27 +685,31 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 	
 				File file = new File("src\\livres.bin");
 				if(file.exists()){
-					if(addresseMap.size()==0){
+//					if(addresseMap.size()==0){
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					donnee.seek(0);
 					long debut=0;
 					for (int i=0;i<donnee.length();i++){
 							long adr = donnee.getFilePointer();
-							Long[] infoAdr = {adr,adr-debut,(long) 1};
-							debut =adr;
+							//debut =adr;
 							cle = donnee.readInt();
-							titre=donnee.readUTF();
+							if(cle>0){
+								titre=donnee.readUTF();
 							auteur=donnee.readInt();
 							annee=donnee.readInt();
 							pages=donnee.readInt();
 							cathegorie=donnee.readUTF();
-								addresseMap.put(cle,infoAdr); 
+
+							Long[] infoAdr = {adr,tailleMot(titre, cathegorie),(long) 1};
+
+							addresseMap.put(cle,infoAdr); 
+						}
 								//Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
 								//listeLivres.add(livre);
 							
 					}
 					donnee.close();
-				}
+//				}
 				}else{
 					if(addresseMap.size()==0){
 						int val_retour = fc.showOpenDialog(this);
@@ -754,6 +770,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		
 	}
 	public void sauvgarder() {
+		ArrayList<Livre> listeLivres = remplirArrayliste();
 		addresseMap = new HashMap<>();
 		int cle = 0;
 		String  titre = "";
@@ -805,6 +822,16 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 								
 	}
 	public ArrayList<Livre> remplirArrayliste() {
+		System.out.println("=========ArrayListe=======");
+	for(Long[] val:addresseMap.values()){
+		System.out.println(val[0] + " " + val[1] + " " + val[2]);
+		
+}
+for(Integer key:addresseMap.keySet()){	
+	System.out.println(key);
+
+} 
+System.out.println("====================");
 		ArrayList<Livre> listeLivres = new ArrayList<Livre>();
 		File file = new File("src\\livres.bin");
 		if(file.exists()){
@@ -818,8 +845,10 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 	
 		try {
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
-			donnee.seek(0);
-			for (int i=0;i<donnee.length();i++){
+			//donnee.seek(0);
+			//for (int i=0;i<donnee.length();i++){
+			for(Long[] val:addresseMap.values()){
+				donnee.seek(val[0]);
 				num = donnee.readInt();
 				titre=donnee.readUTF();
 				auteur=donnee.readInt();
@@ -827,7 +856,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 				pages=donnee.readInt();
 				cathegorie=donnee.readUTF();
 				if(num>0){
-				listeLivres.add(new Livre(num,titre,auteur,annee,pages,cathegorie));
+				 listeLivres.add(new Livre(num,titre,auteur,annee,pages,cathegorie));
 				}
 				
 			}
