@@ -10,7 +10,7 @@ import java.text.Normalizer;
 import java.util.*;
 import java.awt.event.*;
 
-public class Application extends JFrame implements actionEvent{
+public class Application2 extends JFrame implements actionEvent{
 
 /*============================================================================================================= */
 /*										Declaration																*/
@@ -41,7 +41,7 @@ static JPanel contentPane = new JPanel();
 /*============================================================================================================= */
 /*										Constructeurs																*/
 /*============================================================================================================= */
-public Application() {
+public Application2() {
 		chargerLivres();
 		affichage();
 		action();

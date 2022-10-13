@@ -192,26 +192,25 @@ static JPanel contentPane = new JPanel();
 public void Suprimer() {
 	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à modifier");
 	int cle= Integer.parseInt(strCle);
-	Livre livreSprimer = new Livre();
+	//Livre livreSprimer = new Livre();
 
 	if(!rechercheCle(cle)){
 			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +" n' existe pas!!");
 			
 	}else{
-		
+/*		
 		for(Livre livre:listeLivres){
 			if(livre.getNum()==cle){
 				livreSprimer = livre;
 				listeLivres.remove(livre);
 				break;
 			}
-		}
+		}*/
 		try {
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 			long adr = rechercherAddresse(cle);
 			
 			donnee.seek(adr);
-				donnee.readInt();
 				donnee.writeInt(-1*cle);
 				donnee.writeUTF("");
 				donnee.writeInt(0);
@@ -219,16 +218,39 @@ public void Suprimer() {
 				donnee.writeInt(0);
 				donnee.writeUTF("");
 			donnee.close();
-			Long[] adrInfo = {adr,tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie()),(long) 0};
+			//Long[] adrInfo = {adr,tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie()),(long) 0};
+			Long[] adrInfo = {addresseMap.get(cle)[0],addresseMap.get(cle)[1],(long) 0};
 			addresseMap.put(-1*cle, adrInfo);
 			//addresseMap.get(cle)[1]=tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie());
 			//addresseMap.get(cle)[2]=(long) 0;
-			System.out.println(-1*cle + " " + addresseMap.get(-1*cle)[0] + " " + addresseMap.get(-1*cle)[1] + " " + addresseMap.get(-1*cle)[2]);
-			
+			System.out.println("=========Suprimer=======");
+
+			for(Long[] val:addresseMap.values()){
+				System.out.println(val[0] + " " + val[1] + " " + val[2]);
+				
+		}
+		for(Integer key:addresseMap.keySet()){	
+			System.out.println(key);
+	
+		} 
+		System.out.println("====================");
+				
 	
 		} catch (Exception e) {
 			e.getMessage();
 		}
+		DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
+		cmbAuteur.removeAll();
+		cmbAuteur.setModel(modelAuteur);
+
+		DefaultComboBoxModel modelNum = new DefaultComboBoxModel<>(getListeCBox("num"));
+		cmbNumero.removeAll();
+		cmbNumero.setModel(modelNum);
+
+		DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
+		cmbCathegorie.removeAll();
+		cmbCathegorie.setModel(modelCath);
+		lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");
 
 		//sauvgarder();
 		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succès");
@@ -249,31 +271,55 @@ public void ajouter() {
 		String[] retour = paneString(data,new ArrayList<String>(){{add("Numéro");add("Titre");add("Auteur");add("Année");add("Pages");}},"                         Entrez les informations du votre nouveau livre");
 		if (retour != null){
 
-			listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
-				Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
+			//listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
+			//	Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
 				try {
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					long adrVide = rechercherAddresseVide(retour[1], retour[5]);
-					if(adrVide != -1){
-						donnee.seek(adrVide);
-					}else{
-						donnee.seek(donnee.length());
+					if(adrVide == -1){
+						adrVide= donnee.length();
 					}
-						donnee.readInt();
-						donnee.writeInt(Integer.parseInt(retour[0]));
-						donnee.writeUTF(retour[1]);
-						donnee.writeInt(Integer.parseInt(retour[2]));
-						donnee.writeInt(Integer.parseInt(retour[3]));
-						donnee.writeInt(Integer.parseInt(retour[4]));
-						donnee.writeUTF(retour[5]);
+					donnee.seek(adrVide);
+					donnee.writeInt(Integer.parseInt(retour[0]));
+					donnee.writeUTF(retour[1]);
+					donnee.writeInt(Integer.parseInt(retour[2]));
+					donnee.writeInt(Integer.parseInt(retour[3]));
+					donnee.writeInt(Integer.parseInt(retour[4]));
+					donnee.writeUTF(retour[5]);
+					Long[] adrInfo = {adrVide,tailleMot(retour[1], retour[5]),(long) 1};
+					addresseMap.put(Integer.parseInt(retour[0]), adrInfo);
 					donnee.close();
+
 			
 				} catch (Exception e) {
 					e.getMessage();
 				}
-		
+				System.out.println("=========Ajouter=======");
 
-			sauvgarder();
+				for(Long[] val:addresseMap.values()){
+					System.out.println(val[0] + " " + val[1] + " " + val[2]);
+					
+			}
+			for(Integer key:addresseMap.keySet()){	
+				System.out.println(key);
+		
+			} 
+			System.out.println("====================");
+				
+			DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
+			cmbAuteur.removeAll();
+			cmbAuteur.setModel(modelAuteur);
+
+			DefaultComboBoxModel modelNum = new DefaultComboBoxModel<>(getListeCBox("num"));
+			cmbNumero.removeAll();
+			cmbNumero.setModel(modelNum);
+
+			DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
+			cmbCathegorie.removeAll();
+			cmbCathegorie.setModel(modelCath);
+			lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");
+
+			//sauvgarder();
 			DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
 			table.setModel(modelTable);
 		}	
@@ -306,19 +352,38 @@ public void modifierLivre() {
 			}
 
 		}
-		
-		sauvgarder();
+		DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
+		cmbAuteur.removeAll();
+		cmbAuteur.setModel(modelAuteur);
+
+		DefaultComboBoxModel modelNum = new DefaultComboBoxModel<>(getListeCBox("num"));
+		cmbNumero.removeAll();
+		cmbNumero.setModel(modelNum);
+
+		DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
+		cmbCathegorie.removeAll();
+		cmbCathegorie.setModel(modelCath);
+		lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");
+
+		//sauvgarder();
 		DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
 		table.setModel(modelTable);
 	}
 }
 
 public boolean rechercheCle(int cle) {
+	for(Integer key:addresseMap.keySet()){
+		if(cle==key){
+			return true;
+		}
+	}
+
+	/*
 	for(Livre livre:listeLivres){
 		if(cle==livre.getNum()){
 			return true;
 		}
-	}
+	}*/
 	return false;
 }
 public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,String titre) {
@@ -483,11 +548,13 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		
 	}
 	public DefaultTableModel remplirTable(String entree,String strCle) {
+		ArrayList<Livre> listeLivres = remplirArrayliste();
 		
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
 		if(entree.equals("Choisissez Cathegorie") || strCle.equals("Choisissez Auteur") || strCle.equals("Choisissez Livre") ){
 			for(Livre livre:listeLivres){
+			
 				model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
 			}
 		}else{
@@ -552,7 +619,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 				annee=donnee.readInt();
 				pages=donnee.readInt();
 				cathegorie=donnee.readUTF();
-				if(num !=-1){
+				if(num >0){
 					if(choix.equals("cathegorie")) {
 						liste.add(cathegorie);
 					}else if(choix.equals("auteur")) {
@@ -606,6 +673,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 	
 				File file = new File("src\\livres.bin");
 				if(file.exists()){
+					if(addresseMap.size()==0){
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					donnee.seek(0);
 					long debut=0;
@@ -619,13 +687,16 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 							annee=donnee.readInt();
 							pages=donnee.readInt();
 							cathegorie=donnee.readUTF();
-							addresseMap.put(cle,infoAdr); 
-							Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
-							listeLivres.add(livre);
+								addresseMap.put(cle,infoAdr); 
+								//Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
+								//listeLivres.add(livre);
+							
 					}
 					donnee.close();
+				}
 				}else{
-					int val_retour = fc.showOpenDialog(this);
+					if(addresseMap.size()==0){
+						int val_retour = fc.showOpenDialog(this);
 					if (val_retour == JFileChooser.APPROVE_OPTION) {
 						pathFichier= fc.getSelectedFile().getAbsolutePath();
 						nomFichier= fc.getSelectedFile().getName();
@@ -658,14 +729,16 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 								donnee.writeInt(annee);
 								donnee.writeInt(pages);
 								donnee.writeUTF(cathegorie);
-								Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
-								listeLivres.add(livre);
+								//Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
+								//listeLivres.add(livre);
 							
 								ligne = tmpReadTxt.readLine();
+
 							}	
 
 							donnee.close();	
 							tmpReadTxt.close();	
+						}
 							
 							
 						}else{
@@ -731,7 +804,43 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 				lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");
 								
 	}
+	public ArrayList<Livre> remplirArrayliste() {
+		ArrayList<Livre> listeLivres = new ArrayList<Livre>();
+		File file = new File("src\\livres.bin");
+		if(file.exists()){
 
+		int num=0;
+		String  titre = "";
+		int auteur = 0;
+		int annee = 0;
+		int pages = 0;
+		String cathegorie="";
+	
+		try {
+			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+			donnee.seek(0);
+			for (int i=0;i<donnee.length();i++){
+				num = donnee.readInt();
+				titre=donnee.readUTF();
+				auteur=donnee.readInt();
+				annee=donnee.readInt();
+				pages=donnee.readInt();
+				cathegorie=donnee.readUTF();
+				if(num>0){
+				listeLivres.add(new Livre(num,titre,auteur,annee,pages,cathegorie));
+				}
+				
+			}
+			donnee.close();
+	
+		} catch (Exception e) {
+			e.getMessage();
+		}
+		
+	}
+	return listeLivres;
+		
+}
 /*============================================================================================================= */
 /*										geters et seters																*/
 /*============================================================================================================= */
@@ -757,7 +866,7 @@ public HashMap<Integer, Long[]> getAddresseMap() {
 	public long rechercherAddresseVide(String titre, String cathegorie) {
 		long adr=-1;
 		for(Long[] val:addresseMap.values()){
-			System.out.println(val[0] + " " + val[2] + " " + val[1] + " " + tailleMot(titre, cathegorie));
+			//System.out.println(val[0] + " " + val[2] + " " + val[1] + " " + tailleMot(titre, cathegorie));
 			//System.out.println(-1*cle + " " + addresseMap.get(-1*cle)[0] + " " + addresseMap.get(-1*cle)[1] + " " + addresseMap.get(-1*cle)[2]);
 			if(val[2]==0 && val[1]>= tailleMot(titre, cathegorie)){
 				adr=val[0];
@@ -788,8 +897,18 @@ public HashMap<Integer, Long[]> getAddresseMap() {
 	 public static void main(String[] args) {
 		Application frame = new Application();
 		frame.setVisible(true);
-		
+	System.out.println("=========charge=======");
+
+		for(Long[] val:addresseMap.values()){
+			System.out.println(val[0] + " " + val[1] + " " + val[2]);
+			
 	}
+	for(Integer key:addresseMap.keySet()){	
+		System.out.println(key);
+
+	} 
+	System.out.println("====================");
+}
 
 
 }
