@@ -6,6 +6,7 @@ import javax.swing.table.TableColumnModel;
 
 import java.awt.*;
 import java.io.*;
+import java.security.KeyStore.Entry;
 import java.text.Normalizer;
 import java.util.*;
 import java.awt.event.*;
@@ -25,9 +26,9 @@ static JPanel contentPane = new JPanel();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
 
-	JComboBox<String> cmbNumero =new JComboBox<>(getListeCBox("num"));
-	JComboBox<String> cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
-	JComboBox<String> cmbAuteur = new  JComboBox<>(getListeCBox("auteur"));
+	JComboBox<String> cmbNumero =new JComboBox<>();
+	JComboBox<String> cmbCathegorie = new  JComboBox<>();
+	JComboBox<String> cmbAuteur = new  JComboBox<>();
 
 	static JButton btnLivres = new JButton("Afficher les livres");
 	static JButton btnModifierTitre = new JButton("Modifier un titre");
@@ -190,7 +191,13 @@ static JPanel contentPane = new JPanel();
 /*										S-A-R     															    */
 /*============================================================================================================= */
 public void Suprimer() {
-	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à modifier");
+	long adr=0;
+	String titre="",titreVide="";
+	int auteur=0;
+	int annee=0;
+	int pages=0;
+	String cathegorie="",cathegorieVide="";
+String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à modifier");
 	int cle= Integer.parseInt(strCle);
 	//Livre livreSprimer = new Livre();
 
@@ -208,19 +215,37 @@ public void Suprimer() {
 		}*/
 		try {
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
-			long adr = rechercherAddresse(cle);
-			Long[] adrInfo = {addresseMap.get(cle)[0],addresseMap.get(cle)[1],(long) 0};
+			adr = rechercherAddresse(cle);
+			donnee.seek(adr);
+			cle = donnee.readInt();
+			titre =donnee.readUTF();
+			auteur = donnee.readInt();
+			annee = donnee.readInt();
+			pages = donnee.readInt();
+			cathegorie =donnee.readUTF();
+			donnee.close();
+		} catch (Exception e) {
+			e.getMessage();
+		}
+
+		try{
+			Long[] adrInfo = {adr,tailleMot(titre, cathegorie),(long) 0};
 			addresseMap.put(-1*cle, adrInfo);
-			
+			addresseMap.remove(cle);
+			for(int i=0;i<titre.length();i++){
+				titreVide +=" ";
+			}
+			for(int i=0;i<cathegorie.length();i++){
+				cathegorieVide +=" ";
+			}
 			donnee.seek(adr);
 				donnee.writeInt(-1*cle);
-				donnee.writeUTF("");
+				donnee.writeUTF(titreVide);
 				donnee.writeInt(0);
 				donnee.writeInt(0);
 				donnee.writeInt(0);
-				donnee.writeUTF("");
+				donnee.writeUTF(cathegorieVide);
 			donnee.close();
-			addresseMap.remove(cle);
 
 			//Long[] adrInfo = {adr,tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie()),(long) 0};
 			//addresseMap.get(cle)[1]=tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie());
@@ -282,7 +307,20 @@ public void ajouter() {
 					long adrVide = rechercherAddresseVide(retour[1], retour[5]);
 					if(adrVide == -1){
 						adrVide= donnee.length();
+	
+					}else{
+						Integer del=0;
+						for (java.util.Map.Entry<Integer, Long[]> entry : addresseMap.entrySet()) { 
+							if (entry.getValue()[0]==adrVide) { 
+								del = entry.getKey();
+							} 
+						}
+						addresseMap.remove(del);
 					}
+
+					Long[] adrInfo = {adrVide,tailleMot(retour[1], retour[5]),(long) 1};
+					addresseMap.put(Integer.parseInt(retour[0]), adrInfo);
+
 					donnee.seek(adrVide);
 					donnee.writeInt(Integer.parseInt(retour[0]));
 					donnee.writeUTF(retour[1]);
@@ -290,8 +328,6 @@ public void ajouter() {
 					donnee.writeInt(Integer.parseInt(retour[3]));
 					donnee.writeInt(Integer.parseInt(retour[4]));
 					donnee.writeUTF(retour[5]);
-					Long[] adrInfo = {adrVide,tailleMot(retour[1], retour[5]),(long) 1};
-					addresseMap.put(Integer.parseInt(retour[0]), adrInfo);
 					donnee.close();
 
 			
@@ -490,68 +526,6 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 /*============================================================================================================= */
 /*										Fonctions																*/
 /*============================================================================================================= */
-	public DefaultTableModel imageTable() {
-		entete = table.getTableHeader();
-		entete.setFont(new Font("Serif", Font.BOLD, 20));
-		entete.setBackground(Color.orange);//new Color(128,128,128));//new Color(105,105,105));
-		entete.setForeground(Color.BLACK);
-
-		String[] column = {"Bienvenue à l'application de gestion des livres "};
-		table.setRowHeight(558);
-		DefaultTableModel model = new DefaultTableModel(column,0)
-		{
-			
-            public Class getColumnClass(int column)
-            {
-                switch (column)
-                {
-                    case 0: return Icon.class;
-                    default: return super.getColumnClass(column);
-                }
-            }
-        };
-
-		ImageIcon img =  new ImageIcon("src\\livre2.jpg");
-		model.addRow(new Object[]{img});
-
-		return model;	
-	}
-	public void btnStyle(JButton btn){
-		btn.setSize(new Dimension(200,20));
-		btn.setBackground(new Color(12,128,144));		
-		btn.setForeground(Color.white);
-		btn.setFont( new Font("Serif", Font.BOLD, 18));
-		btn.setOpaque(true);
-
-	}
-
-	public void styleTable(Color bgColor,Color pColor) {
-		JTableHeader entete = table.getTableHeader();
-		entete.setFont(new Font("Serif", Font.BOLD, 18));
-		entete.setBackground(new Color(128,128,128));//new Color(105,105,105));
-		entete.setForeground(Color.white);
-		TableColumnModel columnModelEntete = entete.getColumnModel();
-		columnModelEntete.getColumn(0).setPreferredWidth(5);
-		columnModelEntete.getColumn(1).setPreferredWidth(400);
-		columnModelEntete.getColumn(2).setPreferredWidth(5);
-		columnModelEntete.getColumn(3).setPreferredWidth(5);
-		columnModelEntete.getColumn(4).setPreferredWidth(5);
-		columnModelEntete.getColumn(5).setPreferredWidth(100);
-		TableColumnModel columnModel = table.getColumnModel();
-		columnModel.getColumn(0).setPreferredWidth(5);
-		columnModel.getColumn(1).setPreferredWidth(400);
-		columnModel.getColumn(2).setPreferredWidth(5);
-		columnModel.getColumn(3).setPreferredWidth(5);
-		columnModel.getColumn(4).setPreferredWidth(5);
-		columnModel.getColumn(5).setPreferredWidth(100);
-		table.setBackground(bgColor);
-		table.setForeground(pColor);
-		table.setRowHeight(20);
-		table.setFont(new Font("Serif", Font.BOLD, 18));
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-		
-	}
 	public DefaultTableModel remplirTable(String entree,String strCle) {
 		ArrayList<Livre> listeLivres = remplirArrayliste();
 		
@@ -602,7 +576,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 
 	public  String[] getListeCBox(String choix){
 
-		chargerLivres();
+		//chargerLivres();
 	
 		String[] retour =new String[1];
 		File file = new File("src\\livres.bin");
@@ -621,15 +595,15 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 			//donnee.seek(0);
 			//for (int i=0;i<donnee.length();i++){
-			for(Long[] val:addresseMap.values()){
-				donnee.seek(val[0]);
+			for(Integer key:addresseMap.keySet()){
+				if(key >0){
+  				donnee.seek(addresseMap.get(key)[0]);
 				num = donnee.readInt();
 				titre=donnee.readUTF();
 				auteur=donnee.readInt();
 				annee=donnee.readInt();
 				pages=donnee.readInt();
 				cathegorie=donnee.readUTF();
-				if(num >0){
 					if(choix.equals("cathegorie")) {
 						liste.add(cathegorie);
 					}else if(choix.equals("auteur")) {
@@ -685,31 +659,32 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 	
 				File file = new File("src\\livres.bin");
 				if(file.exists()){
+
 //					if(addresseMap.size()==0){
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					donnee.seek(0);
 					long debut=0;
 					for (int i=0;i<donnee.length();i++){
-							long adr = donnee.getFilePointer();
-							//debut =adr;
+						long adr = donnee.getFilePointer();
+						//debut =adr;
 							cle = donnee.readInt();
-							if(cle>0){
-								titre=donnee.readUTF();
+							//if(cle>0){
+							titre=donnee.readUTF();
 							auteur=donnee.readInt();
 							annee=donnee.readInt();
 							pages=donnee.readInt();
 							cathegorie=donnee.readUTF();
-
 							Long[] infoAdr = {adr,tailleMot(titre, cathegorie),(long) 1};
 
 							addresseMap.put(cle,infoAdr); 
-						}
+						//}
 								//Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
 								//listeLivres.add(livre);
 							
 					}
 					donnee.close();
-//				}
+					
+
 				}else{
 					if(addresseMap.size()==0){
 						int val_retour = fc.showOpenDialog(this);
@@ -769,6 +744,113 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		
 		
 	}
+
+	public ArrayList<Livre> remplirArrayliste() {
+		ArrayList<Livre> listeLivres = new ArrayList<Livre>();
+		File file = new File("src\\livres.bin");
+		if(file.exists()){
+
+		int num=0;
+		String  titre = "";
+		int auteur = 0;
+		int annee = 0;
+		int pages = 0;
+		String cathegorie="";
+	
+		try {
+			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+			//donnee.seek(0);
+			//for (int i=0;i<donnee.length();i++){
+			for(Integer key:addresseMap.keySet()){
+				if(key>0){
+				donnee.seek(addresseMap.get(key)[0]);
+				num = donnee.readInt();
+				titre=donnee.readUTF();
+				auteur=donnee.readInt();
+				annee=donnee.readInt();
+				pages=donnee.readInt();
+				cathegorie=donnee.readUTF();
+				 listeLivres.add(new Livre(num,titre,auteur,annee,pages,cathegorie));
+				}
+				
+			}
+			donnee.close();
+	
+		} catch (Exception e) {
+			e.getMessage();
+		}
+		
+	}
+	System.out.println("=========Liste=======");
+	for(Livre livre:listeLivres){
+		System.out.println(livre.toString());
+		
+}
+
+	return listeLivres;
+		
+}
+
+public DefaultTableModel imageTable() {
+	entete = table.getTableHeader();
+	entete.setFont(new Font("Serif", Font.BOLD, 20));
+	entete.setBackground(Color.orange);//new Color(128,128,128));//new Color(105,105,105));
+	entete.setForeground(Color.BLACK);
+
+	String[] column = {"Bienvenue à l'application de gestion des livres "};
+	table.setRowHeight(558);
+	DefaultTableModel model = new DefaultTableModel(column,0)
+	{
+		
+		public Class getColumnClass(int column)
+		{
+			switch (column)
+			{
+				case 0: return Icon.class;
+				default: return super.getColumnClass(column);
+			}
+		}
+	};
+
+	ImageIcon img =  new ImageIcon("src\\livre2.jpg");
+	model.addRow(new Object[]{img});
+
+	return model;	
+}
+public void btnStyle(JButton btn){
+	btn.setSize(new Dimension(200,20));
+	btn.setBackground(new Color(12,128,144));		
+	btn.setForeground(Color.white);
+	btn.setFont( new Font("Serif", Font.BOLD, 18));
+	btn.setOpaque(true);
+
+}
+
+public void styleTable(Color bgColor,Color pColor) {
+	JTableHeader entete = table.getTableHeader();
+	entete.setFont(new Font("Serif", Font.BOLD, 18));
+	entete.setBackground(new Color(128,128,128));//new Color(105,105,105));
+	entete.setForeground(Color.white);
+	TableColumnModel columnModelEntete = entete.getColumnModel();
+	columnModelEntete.getColumn(0).setPreferredWidth(5);
+	columnModelEntete.getColumn(1).setPreferredWidth(400);
+	columnModelEntete.getColumn(2).setPreferredWidth(5);
+	columnModelEntete.getColumn(3).setPreferredWidth(5);
+	columnModelEntete.getColumn(4).setPreferredWidth(5);
+	columnModelEntete.getColumn(5).setPreferredWidth(100);
+	TableColumnModel columnModel = table.getColumnModel();
+	columnModel.getColumn(0).setPreferredWidth(5);
+	columnModel.getColumn(1).setPreferredWidth(400);
+	columnModel.getColumn(2).setPreferredWidth(5);
+	columnModel.getColumn(3).setPreferredWidth(5);
+	columnModel.getColumn(4).setPreferredWidth(5);
+	columnModel.getColumn(5).setPreferredWidth(100);
+	table.setBackground(bgColor);
+	table.setForeground(pColor);
+	table.setRowHeight(20);
+	table.setFont(new Font("Serif", Font.BOLD, 18));
+	table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+}
 	public void sauvgarder() {
 		ArrayList<Livre> listeLivres = remplirArrayliste();
 		addresseMap = new HashMap<>();
@@ -820,56 +902,10 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 				cmbCathegorie.setModel(modelCath);
 				lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");
 								
-	}
-	public ArrayList<Livre> remplirArrayliste() {
-		System.out.println("=========ArrayListe=======");
-	for(Long[] val:addresseMap.values()){
-		System.out.println(val[0] + " " + val[1] + " " + val[2]);
-		
-}
-for(Integer key:addresseMap.keySet()){	
-	System.out.println(key);
 
-} 
-System.out.println("====================");
-		ArrayList<Livre> listeLivres = new ArrayList<Livre>();
-		File file = new File("src\\livres.bin");
-		if(file.exists()){
-
-		int num=0;
-		String  titre = "";
-		int auteur = 0;
-		int annee = 0;
-		int pages = 0;
-		String cathegorie="";
 	
-		try {
-			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
-			//donnee.seek(0);
-			//for (int i=0;i<donnee.length();i++){
-			for(Long[] val:addresseMap.values()){
-				donnee.seek(val[0]);
-				num = donnee.readInt();
-				titre=donnee.readUTF();
-				auteur=donnee.readInt();
-				annee=donnee.readInt();
-				pages=donnee.readInt();
-				cathegorie=donnee.readUTF();
-				if(num>0){
-				 listeLivres.add(new Livre(num,titre,auteur,annee,pages,cathegorie));
-				}
-				
-			}
-			donnee.close();
-	
-		} catch (Exception e) {
-			e.getMessage();
-		}
-		
-	}
-	return listeLivres;
-		
 }
+
 /*============================================================================================================= */
 /*										geters et seters																*/
 /*============================================================================================================= */
