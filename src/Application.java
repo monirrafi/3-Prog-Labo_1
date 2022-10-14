@@ -526,7 +526,34 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 /*============================================================================================================= */
 /*										Fonctions																*/
 /*============================================================================================================= */
-	public DefaultTableModel remplirTable(String entree,String strCle) {
+public static void lister() throws IOException {
+	int num, duree;
+	String titre, categ;
+	donnee = new RandomAccessFile("src/films.bin", "rw");
+	try {
+	   // Les fichiers binaires n'ont pas de fin de fichier. Donc
+	   // lorsqu'il n'aura plus de données à lire il va déclancher 
+	   // une exception que sera prise dans le catch et y ont ferme 
+	   // le fichier.
+	   System.out.println("\n********** LISTE DES LIVRES **********\n");
+	   while (true) {// Boucle infinie
+			   num = donnee.readInt();
+			   titre = donnee.readUTF();
+			   categ = donnee.readUTF();
+			   duree = donnee.readInt();
+			   // -1 indique que le film a été supprimé mais il a fallut lire
+			   // les autres données pour se positionner au prochain enregistrement.
+			   if (num != -1) {
+				   System.out.println("NUMÉRO = " + num + "\nTITRE = " + titre);
+				   System.out.println("CATÉGORIE = " + categ + "\nDURÉE = " + duree);
+				   System.out.println("*****************************");
+			   }
+	   }
+	} catch (Exception e) {
+		donnee.close();
+	} 
+}
+public DefaultTableModel remplirTable(String entree,String strCle) {
 		ArrayList<Livre> listeLivres = remplirArrayliste();
 		
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
@@ -745,7 +772,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 		
 	}
 
-	public ArrayList<Livre> remplirArrayliste() {
+	public static ArrayList<Livre> remplirArrayliste() {
 		ArrayList<Livre> listeLivres = new ArrayList<Livre>();
 		File file = new File("src\\livres.bin");
 		if(file.exists()){
@@ -962,18 +989,15 @@ public HashMap<Integer, Long[]> getAddresseMap() {
 	 public static void main(String[] args) {
 		Application frame = new Application();
 		frame.setVisible(true);
-	System.out.println("=========charge=======");
-
-		for(Long[] val:addresseMap.values()){
-			System.out.println(val[0] + " " + val[1] + " " + val[2]);
-			
-	}
-	for(Integer key:addresseMap.keySet()){	
-		System.out.println(key);
-
-	} 
-	System.out.println("====================");
-}
+		//remplirArrayliste();
+		try {
+			lister();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	 }
+	
 
 
 }
