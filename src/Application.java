@@ -177,11 +177,6 @@ static JPanel contentPane = new JPanel();
 			styleTable(new Color(255,140,0), Color.BLACK);
 			
 		}
-		/*else if(e.getSource()== champAuteur){
-			String no = (String)champAuteur.getSelectedItem();
-			noAuteur = (String)champAuteur.getSelectedItem();
-			
-		}*/
 	}
 	@Override
 	public void action() {
@@ -216,14 +211,6 @@ String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à
 			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +" n' existe pas!!");
 			
 	}else{
-/*		
-		for(Livre livre:listeLivres){
-			if(livre.getNum()==cle){
-				livreSprimer = livre;
-				listeLivres.remove(livre);
-				break;
-			}
-		}*/
 		try {
 			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 			adr = rechercherAddresse(cle);
@@ -258,11 +245,6 @@ String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à
 				donnee.writeInt(0);
 				donnee.writeUTF(cathegorieVide);
 			donnee.close();
-
-			//Long[] adrInfo = {adr,tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie()),(long) 0};
-			//addresseMap.get(cle)[1]=tailleMot(livreSprimer.getTitre(), livreSprimer.getCathegorie());
-			//addresseMap.get(cle)[2]=(long) 0;
-
 				
 	
 		} catch (Exception e) {
@@ -284,7 +266,6 @@ String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à
 		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succès");
 		DefaultTableModel modelTable = remplirTable("","0");
 		table.setModel(modelTable);
-//		sauvgarder();
 
 	}
 	
@@ -422,30 +403,19 @@ public boolean rechercheCle(int cle) {
 			return true;
 		}
 	}
-
-	/*
-	for(Livre livre:listeLivres){
-		if(cle==livre.getNum()){
-			return true;
-		}
-	}*/
 	return false;
 }
 public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,String titre) {
 	String[] retour = new String[6];
-//		if(data.get(0)==null){
 			Dimension d =new Dimension(350,20);
 			Color cl = new Color(102,178,255);
 			ArrayList<JTextField> listeJtxt = new ArrayList<>();
-			//ArrayList<String> listeChamps= new ArrayList<String>();
-			//listeChamps = new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");}};
 
 			JPanel panePrincipal = new JPanel(new GridBagLayout());
 			JPanel gPane = new JPanel(new GridLayout(listeChamps.size()+2,1,0,5));
 			GridBagConstraints c = new GridBagConstraints();	
 			JLabel lblTitre = new JLabel(titre);
 			lblTitre.setFont(new Font("Serif", Font.BOLD, 20));
-//			entete.setBackground(new Color(128,128,128));//new Color(105,105,105));
 			lblTitre.setForeground(Color.blue);
 				ButtonGroup groupeWeb = new ButtonGroup();
 				gPane.add(lblTitre);
@@ -561,11 +531,6 @@ public int calculerTaille() {
 	return size;
 }
 public DefaultTableModel remplirTable(String entree,String strCle) {
-
-		//ArrayList<Livre> listeLivres = new ArrayList<>();
-		//for(TableIndex val:addresseMap.values()){
-		//	listeLivres.add(val.getLivre());
-		//}
 		
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
@@ -736,8 +701,6 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 							new Livre(cle,titre,auteur,annee,pages,cathegorie));
 
 							addresseMap.put(cle,infoAdr); 
-								//Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
-								//listeLivres.add(livre);
 							
 					}
 					donnee.close();
@@ -929,16 +892,6 @@ public void sauvgarder() {
 						annee = addresseMap.get(key).getLivre().getAnnee();
 						pages = addresseMap.get(key).getLivre().getPages();
 						cathegorie =  addresseMap.get(key).getLivre().getCathegorie();
-						//Long lng =donnee.getFilePointer();
-						
-						//long adr = donnee.getFilePointer();
-						//Long[] infoAdr = {adr,adr-debut,(long) 1};
-						//TableIndex infoAdr = new TableIndex(adr, tailleMot(titre, cathegorie), 1,
-						//new Livre(cle,titre,auteur,annee,pages,cathegorie));
-
-						//debut =adr;
-
-						//addresseMap.put(cle,infoAdr);
 						donnee.writeInt(cle);
 						donnee.writeUTF(titre);
 						donnee.writeInt(auteur);
@@ -950,21 +903,6 @@ public void sauvgarder() {
 				} catch (Exception e) {
 					e.getMessage();
 				}
-				/*
-				DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
-				cmbAuteur.removeAll();
-				cmbAuteur.setModel(modelAuteur);
-
-				DefaultComboBoxModel modelNum = new DefaultComboBoxModel<>(getListeCBox("num"));
-				cmbNumero.removeAll();
-				cmbNumero.setModel(modelNum);
-
-				DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
-				cmbCathegorie.removeAll();
-				cmbCathegorie.setModel(modelCath);
-				lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");*/
-								
-
 	
 }
 
