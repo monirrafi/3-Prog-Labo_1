@@ -851,7 +851,7 @@ public DefaultTableModel imageTable() {
 		}
 	};
 
-	ImageIcon img =  new ImageIcon("src\\images\\livre2.jpg");
+	ImageIcon img =  new ImageIcon("src\\images\\biblio1.jpg");
 	model.addRow(new Object[]{img});
 
 	return model;	
