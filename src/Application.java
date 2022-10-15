@@ -49,8 +49,10 @@ static JPanel contentPane = new JPanel();
 		
 	}
 	public void affichage() {
+		ImageIcon logo = new ImageIcon(getClass().getResource("\\images\\biblio.png"));
+		setIconImage(logo.getImage());
 		contentPane = new JPanel();
-		setTitle("Gestion des livres");
+		setTitle("Gestion de la bibliotheque");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1550, 700);
 		contentPane.setBorder(new EmptyBorder(5, 5, 1, 0));
@@ -849,7 +851,7 @@ public DefaultTableModel imageTable() {
 		}
 	};
 
-	ImageIcon img =  new ImageIcon("src\\livre2.jpg");
+	ImageIcon img =  new ImageIcon("src\\images\\livre2.jpg");
 	model.addRow(new Object[]{img});
 
 	return model;	
