@@ -6,6 +6,7 @@ import javax.swing.table.TableColumnModel;
 
 import java.awt.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.*;
 import java.awt.event.*;
@@ -278,11 +279,12 @@ String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à
 		DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
 		cmbCathegorie.removeAll();
 		cmbCathegorie.setModel(modelCath);
-		lblSize.setText(" Le nombre des livres est " + remplirArrayliste().size() + " ");
+		lblSize.setText(" Le nombre des livres est " + calculerTaille() + " ");
 		//sauvgarder();
 		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succès");
 		DefaultTableModel modelTable = remplirTable("","0");
 		table.setModel(modelTable);
+//		sauvgarder();
 
 	}
 	
@@ -315,8 +317,8 @@ public void ajouter() {
 
 					//Long[] adrInfo = {adrVide,tailleMot(retour[1], retour[5]),(long) 1};
 					TableIndex adrInfo = new TableIndex(adrVide, tailleMot(retour[1], retour[5]), 1,
-					new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
-						Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
+					new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[4]),
+						Integer.parseInt(retour[2]),Integer.parseInt(retour[3]),retour[5]));
 					addresseMap.put(Integer.parseInt(retour[0]), adrInfo);
 
 					donnee.seek(adrVide);
@@ -343,13 +345,14 @@ public void ajouter() {
 			DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
 			cmbCathegorie.removeAll();
 			cmbCathegorie.setModel(modelCath);
-			lblSize.setText(" Le nombre des livres est " + remplirArrayliste().size() + " ");
+			lblSize.setText(" Le nombre des livres est " + calculerTaille() + " ");
 
 			//sauvgarder();
 			DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
 			table.setModel(modelTable);
 		}	
 	}
+//	sauvgarder();
 
 }
 public void modifierLivre() {
@@ -403,12 +406,14 @@ public void modifierLivre() {
 		DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
 		cmbCathegorie.removeAll();
 		cmbCathegorie.setModel(modelCath);
-		lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");
+		lblSize.setText(" Le nombre des livres est " + calculerTaille() + " ");
 
 		//sauvgarder();
 		DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
 		table.setModel(modelTable);
 	}
+//	sauvgarder();
+
 }
 
 public boolean rechercheCle(int cle) {
@@ -546,9 +551,21 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 /*============================================================================================================= */
 /*										Fonctions																*/
 /*============================================================================================================= */
+public int calculerTaille() {
+	int size =0;
+	for(Integer key:addresseMap.keySet()){
+		if(key>=0){
+			size+=1;
+		}
+	}
+	return size;
+}
 public DefaultTableModel remplirTable(String entree,String strCle) {
 
-		//ArrayList<Livre> listeLivres = remplirArrayliste();
+		//ArrayList<Livre> listeLivres = new ArrayList<>();
+		//for(TableIndex val:addresseMap.values()){
+		//	listeLivres.add(val.getLivre());
+		//}
 		
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
@@ -621,7 +638,6 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 	public  String[] getListeCBox(String choix){
 
 		//chargerLivres();
-	
 		String[] retour =new String[1];
 		File file = new File("src\\livres.bin");
 		if(file.exists()){
@@ -663,6 +679,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 			e.getMessage();
 		}
 		//enlever les doublants
+		if(liste.size() != 0){
 		listeTmp.add(liste.get(0));
 		for(String current:liste){
 			if(listeTmp.indexOf(current)==-1){
@@ -683,7 +700,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 			retour[i+1]=listeTmp.get(i);
 		}
 	}
-
+	}
 
 		return retour;
 	
@@ -735,7 +752,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 					
 						if(nomFichier.equals("livres.txt")){ 
 					
-							tmpReadTxt = new BufferedReader(new InputStreamReader(new java.io.FileInputStream(pathFichier), "UTF8"));
+							tmpReadTxt = new BufferedReader(new InputStreamReader(new java.io.FileInputStream(pathFichier), "UTF-8"));
 							//tmpReadTxt = new BufferedReader(new FileReader(fichierTxt));//"src\\livres.txt"
 							donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 							String ligne = tmpReadTxt.readLine();
@@ -836,7 +853,7 @@ public DefaultTableModel imageTable() {
 	entete.setBackground(Color.orange);//new Color(128,128,128));//new Color(105,105,105));
 	entete.setForeground(Color.BLACK);
 
-	String[] column = {"Bienvenue à l'application de gestion des livres "};
+	String[] column = {"Bienvenue à la gestion d'une bibliothéque "};
 	table.setRowHeight(558);
 	DefaultTableModel model = new DefaultTableModel(column,0)
 	{
@@ -851,7 +868,7 @@ public DefaultTableModel imageTable() {
 		}
 	};
 
-	ImageIcon img =  new ImageIcon("src\\images\\biblio1.jpg");
+	ImageIcon img =  new ImageIcon("src\\images\\livre2.jpg");
 	model.addRow(new Object[]{img});
 
 	return model;	
