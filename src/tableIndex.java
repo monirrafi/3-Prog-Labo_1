@@ -1,12 +1,13 @@
-public class tableIndex {
+public class TableIndex {
     private long adr;
     private long taille;
     private int status;
-    
-    public tableIndex(long adr, long taille, int status) {
+    private Livre livre;
+    public TableIndex(long adr, long taille, int status, Livre livre) {
         this.adr = adr;
         this.taille = taille;
         this.status = status;
+        this.livre = livre;
     }
     public long getAdr() {
         return adr;
@@ -25,6 +26,12 @@ public class tableIndex {
     }
     public void setStatus(int status) {
         this.status = status;
+    }
+    public Livre getLivre() {
+        return livre;
+    }
+    public void setLivre(Livre livre) {
+        this.livre = livre;
     }
     
     

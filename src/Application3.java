@@ -6,11 +6,12 @@ import javax.swing.table.TableColumnModel;
 
 import java.awt.*;
 import java.io.*;
+import java.security.KeyStore.Entry;
 import java.text.Normalizer;
 import java.util.*;
 import java.awt.event.*;
 
-public class Application extends JFrame implements actionEvent{
+public class Application3 extends JFrame implements actionEvent{
 
 /*============================================================================================================= */
 /*										Declaration																*/
@@ -20,16 +21,15 @@ static JPanel contentPane = new JPanel();
 	private JTable table = new JTable();
 
 	static String nomFichier;
-	static HashMap<Integer,TableIndex> addresseMap = new HashMap<>();
+	static HashMap<Integer,Long[]> addresseMap = new HashMap<>();
 	//static ArrayList<Livre> listeLivres = new ArrayList<>();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
-	static String noAuteur=""; 
 
 	JComboBox<String> cmbNumero =new JComboBox<>();
 	JComboBox<String> cmbCathegorie = new  JComboBox<>();
 	JComboBox<String> cmbAuteur = new  JComboBox<>();
-	JComboBox<String>   champAuteur = new  JComboBox<>();
+
 	static JButton btnLivres = new JButton("Afficher les livres");
 	static JButton btnModifierTitre = new JButton("Modifier un titre");
 	static JButton btnSuprimer = new JButton("Suprimer un livre");
@@ -42,7 +42,7 @@ static JPanel contentPane = new JPanel();
 /*============================================================================================================= */
 /*										Constructeurs																*/
 /*============================================================================================================= */
-	public Application() {
+	public Application3() {
 		chargerLivres();
 		affichage();
 		action();
@@ -150,7 +150,6 @@ static JPanel contentPane = new JPanel();
 			ajouter();
 
 		}else if(ev.getSource()== btnQuitter){
-			sauvgarder();
 			System.exit(0);
 
 		}
@@ -174,19 +173,12 @@ static JPanel contentPane = new JPanel();
 			styleTable(new Color(255,140,0), Color.BLACK);
 			
 		}
-		/*else if(e.getSource()== champAuteur){
-			String no = (String)champAuteur.getSelectedItem();
-			noAuteur = (String)champAuteur.getSelectedItem();
-			
-		}*/
 	}
 	@Override
 	public void action() {
 		cmbCathegorie.addItemListener(this::itemStateChanged);
 		cmbNumero.addItemListener(this::itemStateChanged);
 		cmbAuteur.addItemListener(this::itemStateChanged);
-		//champAuteur.addItemListener(this::itemStateChanged);
-
 		btnLivres.addActionListener(this::actionBtn);
 		btnAjouter.addActionListener(this::actionBtn);
 		btnModifierTitre.addActionListener(this::actionBtn);
@@ -237,16 +229,15 @@ String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à
 		}
 
 		try{
-			//Long[] adrInfo = {adr,tailleMot(titre, cathegorie),(long) 0};
+			Long[] adrInfo = {adr,tailleMot(titre, cathegorie),(long) 0};
+			addresseMap.put(-1*cle, adrInfo);
+			addresseMap.remove(cle);
 			for(int i=0;i<titre.length();i++){
 				titreVide +=" ";
 			}
 			for(int i=0;i<cathegorie.length();i++){
 				cathegorieVide +=" ";
 			}
-			TableIndex adrInfo = new TableIndex(adr, tailleMot(titreVide, cathegorieVide), 0, new Livre(-1*cle, titreVide, auteur, annee, pages, cathegorieVide));
-			addresseMap.put(-1*cle, adrInfo);
-			addresseMap.remove(cle);
 			donnee.seek(adr);
 				donnee.writeInt(-1*cle);
 				donnee.writeUTF(titreVide);
@@ -277,6 +268,19 @@ String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à
 		cmbCathegorie.removeAll();
 		cmbCathegorie.setModel(modelCath);
 		lblSize.setText(" Le nombre des livres est " + remplirArrayliste().size() + " ");
+		System.out.println("=========Suprimer=======");
+		for(Long[] val:addresseMap.values()){
+				System.out.println(val[0] + " " + val[1] + " " + val[2]);
+				
+		}
+		for(Integer key:addresseMap.keySet()){	
+			System.out.println(key);
+	
+		} 
+		System.out.println("====================");
+	
+	
+
 		//sauvgarder();
 		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succès");
 		DefaultTableModel modelTable = remplirTable("","0");
@@ -293,8 +297,11 @@ public void ajouter() {
 			
 	}else{
 		ArrayList<String> data = new ArrayList<>(){{add(strCle);add(null);add(null);add(null);add(null);add(null);}};
-		String[] retour = paneString(data,new ArrayList<String>(){{add("Numéro");add("Titre");add("Année");add("Pages");}},"                         Entrez les informations du votre nouveau livre");
+		String[] retour = paneString(data,new ArrayList<String>(){{add("Numéro");add("Titre");add("Auteur");add("Année");add("Pages");}},"                         Entrez les informations du votre nouveau livre");
 		if (retour != null){
+
+			//listeLivres.add(new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
+			//	Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
 				try {
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					long adrVide = rechercherAddresseVide(retour[1], retour[5]);
@@ -303,26 +310,23 @@ public void ajouter() {
 	
 					}else{
 						Integer del=0;
-						for (java.util.Map.Entry<Integer, TableIndex> entry : addresseMap.entrySet()) { 
-							if (entry.getValue().getAdr()==adrVide) { 
+						for (java.util.Map.Entry<Integer, Long[]> entry : addresseMap.entrySet()) { 
+							if (entry.getValue()[0]==adrVide) { 
 								del = entry.getKey();
 							} 
 						}
 						addresseMap.remove(del);
 					}
 
-					//Long[] adrInfo = {adrVide,tailleMot(retour[1], retour[5]),(long) 1};
-					TableIndex adrInfo = new TableIndex(adrVide, tailleMot(retour[1], retour[5]), 1,
-					new Livre(Integer.parseInt(retour[0]),retour[1],Integer.parseInt(retour[2]),
-						Integer.parseInt(retour[3]),Integer.parseInt(retour[4]),retour[5]));
+					Long[] adrInfo = {adrVide,tailleMot(retour[1], retour[5]),(long) 1};
 					addresseMap.put(Integer.parseInt(retour[0]), adrInfo);
 
 					donnee.seek(adrVide);
 					donnee.writeInt(Integer.parseInt(retour[0]));
 					donnee.writeUTF(retour[1]);
-					donnee.writeInt(Integer.parseInt(retour[4]));
 					donnee.writeInt(Integer.parseInt(retour[2]));
 					donnee.writeInt(Integer.parseInt(retour[3]));
+					donnee.writeInt(Integer.parseInt(retour[4]));
 					donnee.writeUTF(retour[5]);
 					donnee.close();
 
@@ -330,6 +334,18 @@ public void ajouter() {
 				} catch (Exception e) {
 					e.getMessage();
 				}
+				System.out.println("=========Ajouter=======");
+
+				for(Long[] val:addresseMap.values()){
+					System.out.println(val[0] + " " + val[1] + " " + val[2]);
+					
+			}
+			for(Integer key:addresseMap.keySet()){	
+				System.out.println(key);
+		
+			} 
+			System.out.println("====================");
+				
 			DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
 			cmbAuteur.removeAll();
 			cmbAuteur.setModel(modelAuteur);
@@ -354,41 +370,28 @@ public void modifierLivre() {
 	ArrayList<Livre> listeLivres = remplirArrayliste();
 	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre a modifier");
 	int cle= Integer.parseInt(strCle);
-	if(!rechercheCle(cle)){
+	   if(!rechercheCle(cle)){
 			JOptionPane.showMessageDialog(null, "le livre du numéro "+ cle +" n' existe pas!!");
 			
 	}else{
-		try {
-			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
-			Livre livre = addresseMap.get(cle).getLivre();
-			ArrayList<String> data = new ArrayList<>(){{add(strCle);add(livre.getTitre());}};
-			String[] retour = paneString(data, new ArrayList<String>(){{add("Numéro");add("Titre");}},"                          Modifier le titre");
-			long adr; 
-			if (retour != null){
-					if(livre.getCathegorie().length()< retour[1].length()){
-						adr = addresseMap.get(cle).getAdr();
-					}else{
-						adr = donnee.length();
-					}
-
+		for(Livre livre:listeLivres){
+			if(livre.getNum()==cle){
+				ArrayList<String> data = new ArrayList<>(){{
+					add(strCle);add(livre.getTitre());}};
+//					add(String.valueOf(livre.getAuteur()));add(String.valueOf(livre.getAnnee()));
+//					add(String.valueOf(livre.getPages()));add(livre.getCathegorie());
+				String[] retour = paneString(data, new ArrayList<String>(){{add("Numéro");add("Titre");}},"                          Modifier le titre");
+				if (retour != null){
 					livre.setNum(cle);
 					livre.setTitre(retour[1]);
-					addresseMap.get(cle).setAdr(adr);
-					addresseMap.get(cle).setLivre(livre);
-					addresseMap.get(cle).setTaille(tailleMot(retour[1], livre.getCathegorie()));
-
-					donnee.seek(adr);
-					donnee.writeInt(cle);
-					donnee.writeUTF(retour[1]);
-					donnee.writeInt(livre.getAuteur());
-					donnee.writeInt(livre.getAnnee());
-					donnee.writeInt(livre.getPages());
-					donnee.writeUTF(livre.getCathegorie());
-					donnee.close();
-
+//					livre.setAuteur(Integer.parseInt(retour[2]));
+//					livre.setAnnee(Integer.parseInt(retour[3]));
+//					livre.setPages(Integer.parseInt(retour[4]));
+//					livre.setCathegorie(retour[5]);
+					break;
+				}
 			}
-		} catch (Exception e) {
-			e.getMessage();
+
 		}
 		DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
 		cmbAuteur.removeAll();
@@ -434,34 +437,13 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 			//listeChamps = new ArrayList<String>(){{add("Numero");add("Titre");add("Auteur");add("Annee");add("Pages");}};
 
 			JPanel panePrincipal = new JPanel(new GridBagLayout());
-			JPanel gPane = new JPanel(new GridLayout(listeChamps.size()+2,1,0,5));
 			GridBagConstraints c = new GridBagConstraints();	
 			JLabel lblTitre = new JLabel(titre);
 			lblTitre.setFont(new Font("Serif", Font.BOLD, 20));
 //			entete.setBackground(new Color(128,128,128));//new Color(105,105,105));
 			lblTitre.setForeground(Color.blue);
 				ButtonGroup groupeWeb = new ButtonGroup();
-				gPane.add(lblTitre);
-				for(int i=0;i<listeChamps.size();i++){
-					JPanel pane = new JPanel();
-					JTextField jtxt = new JTextField(data.get(i));
-					jtxt.setPreferredSize(d);
-					JLabel lbl = new JLabel(listeChamps.get(i));
-					lbl.setPreferredSize(new Dimension(50,20));
-					lbl.setLabelFor(jtxt);
-					listeJtxt.add(jtxt);
-					pane.add(lbl);
-					pane.add(jtxt);
-					gPane.add(pane);
-	
-				}
-				c.weightx = 0.0;
-				c.gridx = 0;
-				c.gridy = 0;
-				c.gridwidth=1;
-				panePrincipal.add(gPane,c);
-				
-				if(listeChamps.size()>2){	
+			if(listeChamps.size()>2){	
 		
 				JLabel lblChoix = new JLabel("                    Choisissez une cathegorie ");
 				JPanel paneRadio = new JPanel(new GridLayout(2,1,0,5));
@@ -492,34 +474,34 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 				c.gridy = 1;
 				c.gridwidth=2;
 				panePrincipal.add(paneRadio,c);
-				JPanel paneAuteur = new JPanel();
-				champAuteur = new  JComboBox<>(getListeCBox("auteur"));
-				champAuteur.setPreferredSize(d);
-				champAuteur.addActionListener(new ActionListener() {     
-					@Override
-					public void actionPerformed(ActionEvent e) {
-					   noAuteur = champAuteur.getSelectedItem().toString();      
-					}
-				  });
-				JLabel lblAuteur = new JLabel("Auteur");
-				lblAuteur.setPreferredSize(new Dimension(50,20));
-				lblAuteur.setLabelFor(champAuteur);
-				paneAuteur.add(lblAuteur);
-				paneAuteur.add(champAuteur);
-				gPane.add(paneAuteur);
-				}	
+			}	
 
+			JPanel gPane = new JPanel(new GridLayout(listeChamps.size()+1,1,0,5));
+			gPane.add(lblTitre);
+			
+			for(int i=0;i<listeChamps.size();i++){
+				JPanel pane = new JPanel();
+				JTextField jtxt = new JTextField(data.get(i));
+				jtxt.setPreferredSize(d);
+				JLabel lbl = new JLabel(listeChamps.get(i));
+				lbl.setPreferredSize(new Dimension(50,20));
+				lbl.setLabelFor(jtxt);
+				listeJtxt.add(jtxt);
+				pane.add(lbl);
+				pane.add(jtxt);
+				gPane.add(pane);
+
+			}
+			c.weightx = 0.0;
+			c.gridx = 0;
+			c.gridy = 0;
+			c.gridwidth=1;
+			panePrincipal.add(gPane,c);
 	
 			int res = JOptionPane.showConfirmDialog(null,panePrincipal,"Modification Livre",JOptionPane.YES_NO_CANCEL_OPTION);
 			if(res == JOptionPane.YES_OPTION){
 				for(int i=0;i<listeJtxt.size();i++){
 					retour[i]= listeJtxt.get(i).getText();
-				}
-				if(noAuteur.equals("")){
-					retour[listeJtxt.size()] = "0";
-
-				}else{
-					retour[listeJtxt.size()] = noAuteur;
 				}
 				Enumeration<AbstractButton> allRadioButton=groupeWeb.getElements();  
 				while(allRadioButton.hasMoreElements())  
@@ -527,7 +509,7 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 				   JRadioButton temp=(JRadioButton)allRadioButton.nextElement();  
 				   if(temp.isSelected())  
 				   { 
-						retour[listeJtxt.size()+1]= temp.getText();  
+						retour[listeJtxt.size()]= temp.getText();  
 				   }  
 				}            
 				
@@ -544,70 +526,73 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 /*============================================================================================================= */
 /*										Fonctions																*/
 /*============================================================================================================= */
+public static void lister() throws IOException {
+	int num, duree;
+	String titre, categ;
+	donnee = new RandomAccessFile("src/films.bin", "rw");
+	try {
+	   // Les fichiers binaires n'ont pas de fin de fichier. Donc
+	   // lorsqu'il n'aura plus de données à lire il va déclancher 
+	   // une exception que sera prise dans le catch et y ont ferme 
+	   // le fichier.
+	   System.out.println("\n********** LISTE DES LIVRES **********\n");
+	   while (true) {// Boucle infinie
+			   num = donnee.readInt();
+			   titre = donnee.readUTF();
+			   categ = donnee.readUTF();
+			   duree = donnee.readInt();
+			   // -1 indique que le film a été supprimé mais il a fallut lire
+			   // les autres données pour se positionner au prochain enregistrement.
+			   if (num != -1) {
+				   System.out.println("NUMÉRO = " + num + "\nTITRE = " + titre);
+				   System.out.println("CATÉGORIE = " + categ + "\nDURÉE = " + duree);
+				   System.out.println("*****************************");
+			   }
+	   }
+	} catch (Exception e) {
+		donnee.close();
+	} 
+}
 public DefaultTableModel remplirTable(String entree,String strCle) {
-
-		//ArrayList<Livre> listeLivres = remplirArrayliste();
+		ArrayList<Livre> listeLivres = remplirArrayliste();
 		
 		String[] column = {"Numero","Titre","Numero Auteur","Annee","Nombre des pages","Cathegorie"};
 		DefaultTableModel model = new DefaultTableModel(column,0);
 		if(entree.equals("Choisissez Cathegorie") || strCle.equals("Choisissez Auteur") || strCle.equals("Choisissez Livre") ){
-		//	for(Livre livre:listeLivres){
-			for(Integer key:addresseMap.keySet()){
-				if(key>=0){
-			 	//Livre livre = addresseMap.get(key).getLivre();
-				model.addRow(new Object[]{key,addresseMap.get(key).getLivre().getTitre(),
-					addresseMap.get(key).getLivre().getAuteur(),addresseMap.get(key).getLivre().getAnnee(),
-					addresseMap.get(key).getLivre().getPages(),addresseMap.get(key).getLivre().getCathegorie()});				
-				}
+			for(Livre livre:listeLivres){
+			
+				model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
 			}
 		}else{
 			int cle = Integer.parseInt(strCle);
 			if(cle==0){
 				if(entree.equals("")){
-					for(Integer key:addresseMap.keySet()){
-						if(key>=0){
-							//Livre livre = addresseMap.get(key).getLivre();
-					   model.addRow(new Object[]{key,addresseMap.get(key).getLivre().getTitre(),
-						   addresseMap.get(key).getLivre().getAuteur(),addresseMap.get(key).getLivre().getAnnee(),
-						   addresseMap.get(key).getLivre().getPages(),addresseMap.get(key).getLivre().getCathegorie()});				
-						   }
+					for(Livre livre:listeLivres){
+						model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
 					}
 				}else{
-					for(Integer key:addresseMap.keySet()){
-						if(key>=0){
-							//Livre livre = addresseMap.get(key).getLivre();
-						String str = addresseMap.get(key).getLivre().getCathegorie();
+					for(Livre livre:listeLivres){
+						String str = livre.getCathegorie();
 						if(entree.equals(str)){
-							   model.addRow(new Object[]{key,addresseMap.get(key).getLivre().getTitre(),
-								   addresseMap.get(key).getLivre().getAuteur(),addresseMap.get(key).getLivre().getAnnee(),
-								   addresseMap.get(key).getLivre().getPages(),addresseMap.get(key).getLivre().getCathegorie()});				
-			   
-						}
+							model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
+
 						}
 					}
 				}
 
 			}else{
-				for(Integer key:addresseMap.keySet()){
-					if(key>=0){
-						int num = addresseMap.get(key).getLivre().getNum();
+				for(Livre livre:listeLivres){
+					int num = livre.getNum();
 					if(cle ==num){
-						model.addRow(new Object[]{key,addresseMap.get(key).getLivre().getTitre(),
-							addresseMap.get(key).getLivre().getAuteur(),addresseMap.get(key).getLivre().getAnnee(),
-							addresseMap.get(key).getLivre().getPages(),addresseMap.get(key).getLivre().getCathegorie()});				
+						model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
 
-					}
 					}
 				}
-				for(Integer key:addresseMap.keySet()){
-					if(key>=0){
-						int num = addresseMap.get(key).getLivre().getAuteur();
+				for(Livre livre:listeLivres){
+					int num = livre.getAuteur();
 					if(cle ==num){
-						model.addRow(new Object[]{key,addresseMap.get(key).getLivre().getTitre(),
-							addresseMap.get(key).getLivre().getAuteur(),addresseMap.get(key).getLivre().getAnnee(),
-							addresseMap.get(key).getLivre().getPages(),addresseMap.get(key).getLivre().getCathegorie()});				
+						model.addRow(new Object[]{livre.getNum(),livre.getTitre(),livre.getAuteur(),livre.getAnnee(),livre.getPages(),livre.getCathegorie()});				
 
-					}
 					}
 				}
 			}
@@ -639,7 +624,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 			//for (int i=0;i<donnee.length();i++){
 			for(Integer key:addresseMap.keySet()){
 				if(key >0){
-  				donnee.seek(addresseMap.get(key).getAdr());
+  				donnee.seek(addresseMap.get(key)[0]);
 				num = donnee.readInt();
 				titre=donnee.readUTF();
 				auteur=donnee.readInt();
@@ -702,21 +687,24 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 				File file = new File("src\\livres.bin");
 				if(file.exists()){
 
+//					if(addresseMap.size()==0){
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					donnee.seek(0);
+					long debut=0;
 					for (int i=0;i<donnee.length();i++){
 						long adr = donnee.getFilePointer();
+						//debut =adr;
 							cle = donnee.readInt();
+							//if(cle>0){
 							titre=donnee.readUTF();
 							auteur=donnee.readInt();
 							annee=donnee.readInt();
 							pages=donnee.readInt();
 							cathegorie=donnee.readUTF();
-							//Long[] infoAdr = {adr,tailleMot(titre, cathegorie),(long) 1};
-							TableIndex infoAdr = new TableIndex(adr, tailleMot(titre, cathegorie), 1,
-							new Livre(cle,titre,auteur,annee,pages,cathegorie));
+							Long[] infoAdr = {adr,tailleMot(titre, cathegorie),(long) 1};
 
 							addresseMap.put(cle,infoAdr); 
+						//}
 								//Livre livre =new Livre(cle,titre,auteur,annee,pages,cathegorie);
 								//listeLivres.add(livre);
 							
@@ -748,13 +736,10 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 								annee = Integer.parseInt(elemt[3]);
 								pages = Integer.parseInt(elemt[4]);
 								cathegorie =  elemt[5];
-
+								//Long lng =donnee.getFilePointer();
 								long adr = donnee.getFilePointer();
-								//Long[] infoAdr = {adr,adr-debut,(long) 1};
-								TableIndex infoAdr = new TableIndex(adr, tailleMot(titre, cathegorie), 1,
-								new Livre(cle,titre,auteur,annee,pages,cathegorie));
+								Long[] infoAdr = {adr,adr-debut,(long) 1};
 								debut =adr;
-
 								addresseMap.put(cle,infoAdr);
 								donnee.writeInt(cle);
 								donnee.writeUTF(titre);
@@ -805,7 +790,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 			//for (int i=0;i<donnee.length();i++){
 			for(Integer key:addresseMap.keySet()){
 				if(key>0){
-				donnee.seek(addresseMap.get(key).getAdr());
+				donnee.seek(addresseMap.get(key)[0]);
 				num = donnee.readInt();
 				titre=donnee.readUTF();
 				auteur=donnee.readInt();
@@ -823,6 +808,11 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 		}
 		
 	}
+	System.out.println("=========Liste=======");
+	for(Livre livre:listeLivres){
+		System.out.println(livre.toString());
+		
+}
 
 	return listeLivres;
 		
@@ -888,11 +878,9 @@ public void styleTable(Color bgColor,Color pColor) {
 	table.setFont(new Font("Serif", Font.BOLD, 18));
 	table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 }
-
-
-public void sauvgarder() {
-		//ArrayList<Livre> listeLivres = remplirArrayliste();
-		//addresseMap = new HashMap<>();
+	public void sauvgarder() {
+		ArrayList<Livre> listeLivres = remplirArrayliste();
+		addresseMap = new HashMap<>();
 		int cle = 0;
 		String  titre = "";
 		int auteur = 0;
@@ -902,24 +890,21 @@ public void sauvgarder() {
 		try {
 					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
 					donnee.seek(0);
-					//long debut=0;
-					for (Integer key:addresseMap.keySet()){
-						cle = key;
-						titre =addresseMap.get(key).getLivre().getTitre();
-						auteur = addresseMap.get(key).getLivre().getAuteur();
-						annee = addresseMap.get(key).getLivre().getAnnee();
-						pages = addresseMap.get(key).getLivre().getPages();
-						cathegorie =  addresseMap.get(key).getLivre().getCathegorie();
+					long debut=0;
+					for (Livre livre:listeLivres){
+						cle = livre.getNum();
+						titre =livre.getTitre();
+						auteur = livre.getAuteur();
+						annee = livre.getAnnee();
+						pages = livre.getPages();
+						cathegorie =  livre.getCathegorie();
 						//Long lng =donnee.getFilePointer();
 						
-						//long adr = donnee.getFilePointer();
-						//Long[] infoAdr = {adr,adr-debut,(long) 1};
-						//TableIndex infoAdr = new TableIndex(adr, tailleMot(titre, cathegorie), 1,
-						//new Livre(cle,titre,auteur,annee,pages,cathegorie));
+						long adr = donnee.getFilePointer();
+						Long[] infoAdr = {adr,adr-debut,(long) 1};
+						debut =adr;
 
-						//debut =adr;
-
-						//addresseMap.put(cle,infoAdr);
+						addresseMap.put(cle,infoAdr);
 						donnee.writeInt(cle);
 						donnee.writeUTF(titre);
 						donnee.writeInt(auteur);
@@ -931,7 +916,6 @@ public void sauvgarder() {
 				} catch (Exception e) {
 					e.getMessage();
 				}
-				/*
 				DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
 				cmbAuteur.removeAll();
 				cmbAuteur.setModel(modelAuteur);
@@ -943,7 +927,7 @@ public void sauvgarder() {
 				DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
 				cmbCathegorie.removeAll();
 				cmbCathegorie.setModel(modelCath);
-				lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");*/
+				lblSize.setText(" Le nombre des livres est " + listeLivres.size() + " ");
 								
 
 	
@@ -953,10 +937,10 @@ public void sauvgarder() {
 /*										geters et seters																*/
 /*============================================================================================================= */
 
-public HashMap<Integer, TableIndex> getAddresseMap() {
+public HashMap<Integer, Long[]> getAddresseMap() {
 		return addresseMap;
 	}
-	public void setAddresseMap(HashMap<Integer, TableIndex> addresseMap) {
+	public void setAddresseMap(HashMap<Integer, Long[]> addresseMap) {
 		this.addresseMap = addresseMap;
 	}
 
@@ -964,7 +948,7 @@ public HashMap<Integer, TableIndex> getAddresseMap() {
 		long adr=-1;
 		for(Integer key:addresseMap.keySet()){
 			if(key==cle){
-				adr=addresseMap.get(key).getAdr();
+				adr=addresseMap.get(key)[0];
 				break;
 			}
 		} 
@@ -973,11 +957,11 @@ public HashMap<Integer, TableIndex> getAddresseMap() {
 	}
 	public long rechercherAddresseVide(String titre, String cathegorie) {
 		long adr=-1;
-		for(TableIndex val:addresseMap.values()){
+		for(Long[] val:addresseMap.values()){
 			//System.out.println(val[0] + " " + val[2] + " " + val[1] + " " + tailleMot(titre, cathegorie));
 			//System.out.println(-1*cle + " " + addresseMap.get(-1*cle)[0] + " " + addresseMap.get(-1*cle)[1] + " " + addresseMap.get(-1*cle)[2]);
-			if(val.getStatus()==0 && val.getAdr()>= tailleMot(titre, cathegorie)){
-				adr=val.getAdr();
+			if(val[2]==0 && val[1]>= tailleMot(titre, cathegorie)){
+				adr=val[0];
 				break;
 			}
 		} 
@@ -1006,7 +990,14 @@ public HashMap<Integer, TableIndex> getAddresseMap() {
 		Application frame = new Application();
 		frame.setVisible(true);
 		//remplirArrayliste();
-	 }	
+		try {
+			lister();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	 }
+	
 
 
 }
