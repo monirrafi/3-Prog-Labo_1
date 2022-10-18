@@ -15,13 +15,12 @@ public class Application extends JFrame implements actionEvent{
 /*============================================================================================================= */
 /*										Declaration																*/
 /*============================================================================================================= */
-static JPanel contentPane = new JPanel();
+	static JPanel contentPane = new JPanel();
 	static JScrollPane scroll =new JScrollPane();
 	private JTable table = new JTable();
 
 	static String nomFichier;
 	static HashMap<Integer,TableIndex> addresseMap = new HashMap<>();
-	//static ArrayList<Livre> listeLivres = new ArrayList<>();
 	static BufferedReader tmpReadTxt;
 	static RandomAccessFile donnee;
 	static String noAuteur=""; 
@@ -38,6 +37,8 @@ static JPanel contentPane = new JPanel();
 	static JLabel lblSize;
 	static GridBagConstraints gbc_tlBar;
 	static 	JTableHeader entete;
+	static final String FICHIER_TXT = "src\\Livres.txt";
+	static final String FICHIER_BIN = "src\\Livres.bin";
 
 /*============================================================================================================= */
 /*										Constructeurs																*/
@@ -49,14 +50,16 @@ static JPanel contentPane = new JPanel();
 		
 	}
 	public void affichage() {
+	/*********************************** frame ********************************************* */
 		ImageIcon logo = new ImageIcon(getClass().getResource("\\images\\biblio.png"));
-		setIconImage(logo.getImage());
 		contentPane = new JPanel();
+		setIconImage(logo.getImage());
 		setTitle("Gestion de la bibliotheque");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1550, 700);
 		contentPane.setBorder(new EmptyBorder(5, 5, 1, 0));
 		setContentPane(contentPane);
+
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[]{266, 62, 0};
 		gbl_contentPane.rowHeights = new int[]{21, 0, 0, 0};
@@ -64,12 +67,19 @@ static JPanel contentPane = new JPanel();
 		gbl_contentPane.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		contentPane.setLayout(gbl_contentPane);
 
+		JToolBar tlBar = new JToolBar();
+		tlBar.setToolTipText("Liste des livres");
+		tlBar.setForeground(Color.BLACK);
+		tlBar.setFont(new Font("Serif", Font.PLAIN, 16));
+		tlBar.setBackground(Color.WHITE);
+
 		table.setModel(imageTable());
 		scroll = new JScrollPane(table);
 		cmbNumero =new JComboBox<>(getListeCBox("num"));
 		cmbCathegorie = new  JComboBox<>(getListeCBox("cathegorie"));
 		cmbAuteur = new  JComboBox<>(getListeCBox("auteur"));
 	
+	/*********************************** Bouttons ********************************************* */
 	
 		btnStyle(btnLivres);
 		btnStyle(btnAjouter);
@@ -77,18 +87,7 @@ static JPanel contentPane = new JPanel();
 		btnStyle(btnModifierTitre);
 		btnStyle(btnQuitter);
 		
-		JToolBar tlBar = new JToolBar();
-		
-		tlBar.setToolTipText("Liste des livres");
-		tlBar.setForeground(Color.BLACK);
-		tlBar.setFont(new Font("Serif", Font.PLAIN, 16));
-		tlBar.setBackground(Color.WHITE);
-		gbc_tlBar = new GridBagConstraints();
-		gbc_tlBar.insets = new Insets(0, 5, 10, 5);
-		gbc_tlBar.anchor = GridBagConstraints.NORTHWEST;
-		gbc_tlBar.gridx = 0;
-		gbc_tlBar.gridy = 0;
-		contentPane.add(tlBar, gbc_tlBar);
+	/*********************************** les liste deroulantes ********************************************* */
 		
 		//JLabel lblCath = new JLabel("Cathegorie");
 		cmbCathegorie.setBackground(new Color(0,128,0));
@@ -110,6 +109,7 @@ static JPanel contentPane = new JPanel();
 		lblSize.setFont( new Font("Serif", Font.BOLD, 16)); 
 		lblSize.setSize(new Dimension(350,20));
 
+	/*********************************** les add au frame ********************************************* */
 		
 		tlBar.add(btnLivres);
 		tlBar.add(btnModifierTitre);
@@ -124,6 +124,13 @@ static JPanel contentPane = new JPanel();
 		tlBar.add(lblSize);
 		tlBar.add(btnQuitter);
 		
+		gbc_tlBar = new GridBagConstraints();
+		gbc_tlBar.insets = new Insets(0, 5, 10, 5);
+		gbc_tlBar.anchor = GridBagConstraints.NORTHWEST;
+		gbc_tlBar.gridx = 0;
+		gbc_tlBar.gridy = 0;
+		contentPane.add(tlBar, gbc_tlBar);
+
 		scroll.setBackground(new Color(128,128,128));
 		gbc_tlBar.gridwidth = 2;
 		gbc_tlBar.fill = GridBagConstraints.BOTH;
@@ -138,7 +145,6 @@ static JPanel contentPane = new JPanel();
 
 	public void actionBtn(ActionEvent ev){
 		if(ev.getSource()== btnLivres){
-			//DefaultTableModel model = remplirTable("","0");
 			table.setModel(remplirTable("","0"));
 			
 
@@ -179,11 +185,12 @@ static JPanel contentPane = new JPanel();
 	}
 	@Override
 	public void action() {
+		/*******les listes deroulantes **********************/
 		cmbCathegorie.addItemListener(this::itemStateChanged);
 		cmbNumero.addItemListener(this::itemStateChanged);
 		cmbAuteur.addItemListener(this::itemStateChanged);
-		//champAuteur.addItemListener(this::itemStateChanged);
 
+		/*******les bouttons **********************/
 		btnLivres.addActionListener(this::actionBtn);
 		btnAjouter.addActionListener(this::actionBtn);
 		btnModifierTitre.addActionListener(this::actionBtn);
@@ -198,11 +205,9 @@ static JPanel contentPane = new JPanel();
 public void Suprimer() {
 	long adr=0;
 	String titre="",titreVide="";
-	int auteur=0;
-	int annee=0;
-	int pages=0;
+	int auteur=0, annee=0,pages=0;
 	String cathegorie="",cathegorieVide="";
-String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à modifier");
+	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à modifier");
 	int cle= Integer.parseInt(strCle);
 	//Livre livreSprimer = new Livre();
 
@@ -210,8 +215,9 @@ String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à
 			JOptionPane.showMessageDialog(null, "le livre du numero "+ cle +" n' existe pas!!");
 			
 	}else{
+		//lire les donnees du fichier binaire
 		try {
-			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+			donnee = new RandomAccessFile(new File(FICHIER_BIN), "rw");
 			adr = rechercherAddresse(cle);
 			donnee.seek(adr);
 			cle = donnee.readInt();
@@ -226,45 +232,32 @@ String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre à
 		}
 
 		try{
-			//Long[] adrInfo = {adr,tailleMot(titre, cathegorie),(long) 0};
+			//remplir les espaces dans les mots de cathegorie et titre
 			for(int i=0;i<titre.length();i++){
 				titreVide +=" ";
 			}
 			for(int i=0;i<cathegorie.length();i++){
 				cathegorieVide +=" ";
 			}
+			//donner cle negatif pour indiquer que c'est une addresse vide
 			TableIndex adrInfo = new TableIndex(adr, tailleMot(titreVide, cathegorieVide), 0, new Livre(-1*cle, titreVide, auteur, annee, pages, cathegorieVide));
 			addresseMap.put(-1*cle, adrInfo);
 			addresseMap.remove(cle);
 			donnee.seek(adr);
-				donnee.writeInt(-1*cle);
-				donnee.writeUTF(titreVide);
-				donnee.writeInt(0);
-				donnee.writeInt(0);
-				donnee.writeInt(0);
-				donnee.writeUTF(cathegorieVide);
+			donnee.writeInt(-1*cle);
+			donnee.writeUTF(titreVide);
+			donnee.writeInt(0);
+			donnee.writeInt(0);
+			donnee.writeInt(0);
+			donnee.writeUTF(cathegorieVide);
 			donnee.close();
 				
 	
 		} catch (Exception e) {
 			e.getMessage();
 		}
-		DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
-		cmbAuteur.removeAll();
-		cmbAuteur.setModel(modelAuteur);
-
-		DefaultComboBoxModel modelNum = new DefaultComboBoxModel<>(getListeCBox("num"));
-		cmbNumero.removeAll();
-		cmbNumero.setModel(modelNum);
-
-		DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
-		cmbCathegorie.removeAll();
-		cmbCathegorie.setModel(modelCath);
-		lblSize.setText(" Le nombre des livres est " + calculerTaille() + " ");
-		//sauvgarder();
+		maj();
 		JOptionPane.showMessageDialog(null,"le livre du numero "+ cle + " est suprimer avec succès");
-		DefaultTableModel modelTable = remplirTable("","0");
-		table.setModel(modelTable);
 
 	}
 	
@@ -278,9 +271,11 @@ public void ajouter() {
 	}else{
 		ArrayList<String> data = new ArrayList<>(){{add(strCle);add(null);add(null);add(null);add(null);add(null);}};
 		String[] retour = paneString(data,new ArrayList<String>(){{add("Numéro");add("Titre");add("Année");add("Pages");}},"                         Entrez les informations du votre nouveau livre");
+
 		if (retour != null){
 				try {
-					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+					donnee = new RandomAccessFile(new File(FICHIER_BIN), "rw");
+					//trouver une addresse vide s'il ne trouve pas (-1) addresse devient la fin du fichier 
 					long adrVide = rechercherAddresseVide(retour[1], retour[5]);
 					if(adrVide == -1){
 						adrVide= donnee.length();
@@ -292,6 +287,7 @@ public void ajouter() {
 								del = entry.getKey();
 							} 
 						}
+						//enlever de hashmap
 						addresseMap.remove(del);
 					}
 
@@ -314,29 +310,14 @@ public void ajouter() {
 				} catch (Exception e) {
 					e.getMessage();
 				}
-			DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
-			cmbAuteur.removeAll();
-			cmbAuteur.setModel(modelAuteur);
-
-			DefaultComboBoxModel modelNum = new DefaultComboBoxModel<>(getListeCBox("num"));
-			cmbNumero.removeAll();
-			cmbNumero.setModel(modelNum);
-
-			DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
-			cmbCathegorie.removeAll();
-			cmbCathegorie.setModel(modelCath);
-			lblSize.setText(" Le nombre des livres est " + calculerTaille() + " ");
-
-			//sauvgarder();
-			DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
-			table.setModel(modelTable);
+		maj();
 		}	
 	}
 //	sauvgarder();
 
 }
 public void modifierLivre() {
-	ArrayList<Livre> listeLivres = remplirArrayliste();
+	//ArrayList<Livre> listeLivres = remplirArrayliste();
 	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre a modifier");
 	int cle= Integer.parseInt(strCle);
 	if(!rechercheCle(cle)){
@@ -344,13 +325,14 @@ public void modifierLivre() {
 			
 	}else{
 		try {
-			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+			donnee = new RandomAccessFile(new File(FICHIER_BIN), "rw");
 			Livre livre = addresseMap.get(cle).getLivre();
 			ArrayList<String> data = new ArrayList<>(){{add(strCle);add(livre.getTitre());}};
 			String[] retour = paneString(data, new ArrayList<String>(){{add("Numéro");add("Titre");}},"                          Modifier le titre");
 			long adr; 
 			if (retour != null){
-					if(livre.getCathegorie().length()< retour[1].length()){
+				//si la longueur modifiee est plus petit 
+					if(retour[1].length()<livre.getCathegorie().length()){
 						adr = addresseMap.get(cle).getAdr();
 					}else{
 						adr = donnee.length();
@@ -375,22 +357,7 @@ public void modifierLivre() {
 		} catch (Exception e) {
 			e.getMessage();
 		}
-		DefaultComboBoxModel modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
-		cmbAuteur.removeAll();
-		cmbAuteur.setModel(modelAuteur);
-
-		DefaultComboBoxModel modelNum = new DefaultComboBoxModel<>(getListeCBox("num"));
-		cmbNumero.removeAll();
-		cmbNumero.setModel(modelNum);
-
-		DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
-		cmbCathegorie.removeAll();
-		cmbCathegorie.setModel(modelCath);
-		lblSize.setText(" Le nombre des livres est " + calculerTaille() + " ");
-
-		//sauvgarder();
-		DefaultTableModel modelTable = remplirTable("",String.valueOf(cle));
-		table.setModel(modelTable);
+	maj();
 	}
 //	sauvgarder();
 
@@ -520,6 +487,25 @@ public String[] paneString(ArrayList<String> data,ArrayList<String> listeChamps,
 /*============================================================================================================= */
 /*										Fonctions																*/
 /*============================================================================================================= */
+public void maj() {
+	DefaultComboBoxModel<String> modelAuteur = new DefaultComboBoxModel<>(getListeCBox("auteur"));
+	cmbAuteur.removeAll();
+	cmbAuteur.setModel(modelAuteur);
+
+	DefaultComboBoxModel modelNum = new DefaultComboBoxModel<>(getListeCBox("num"));
+	cmbNumero.removeAll();
+	cmbNumero.setModel(modelNum);
+
+	DefaultComboBoxModel modelCath = new DefaultComboBoxModel<>(getListeCBox("cathegorie"));
+	cmbCathegorie.removeAll();
+	cmbCathegorie.setModel(modelCath);
+	lblSize.setText(" Le nombre des livres est " + calculerTaille() + " ");
+	//sauvgarder();
+	DefaultTableModel modelTable = remplirTable("","0");
+	table.setModel(modelTable);
+
+	
+}
 public int calculerTaille() {
 	int size =0;
 	for(Integer key:addresseMap.keySet()){
@@ -603,7 +589,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 
 		//chargerLivres();
 		String[] retour =new String[1];
-		File file = new File("src\\livres.bin");
+		File file = new File(FICHIER_BIN);
 		if(file.exists()){
 
 		int num=0;
@@ -616,7 +602,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 		ArrayList<String>  listeTmp = new ArrayList<>();
 		
 		try {
-			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+			donnee = new RandomAccessFile(new File(FICHIER_BIN), "rw");
 			//donnee.seek(0);
 			//for (int i=0;i<donnee.length();i++){
 			for(Integer key:addresseMap.keySet()){
@@ -650,6 +636,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 				listeTmp.add(current);
 			}
 		}
+		Collections.sort(listeTmp);
 		//les premiers elements de la liste deroulante
 		retour = new String[listeTmp.size()+1];
 		if(choix.equals("cathegorie")) {
@@ -682,10 +669,10 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 		String cathegorie = "";
 		try {
 	
-				File file = new File("src\\livres.bin");
+				File file = new File(FICHIER_BIN);
 				if(file.exists()){
 
-					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+					donnee = new RandomAccessFile(new File(FICHIER_BIN), "rw");
 					donnee.seek(0);
 					for (int i=0;i<donnee.length();i++){
 						long adr = donnee.getFilePointer();
@@ -715,8 +702,8 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 						if(nomFichier.equals("livres.txt")){ 
 					
 							tmpReadTxt = new BufferedReader(new InputStreamReader(new java.io.FileInputStream(pathFichier), "UTF-8"));
-							//tmpReadTxt = new BufferedReader(new FileReader(fichierTxt));//"src\\livres.txt"
-							donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+							//tmpReadTxt = new BufferedReader(new FileReader(fichierTxt));//FICHIER_TXT
+							donnee = new RandomAccessFile(new File(FICHIER_BIN), "rw");
 							String ligne = tmpReadTxt.readLine();
 							String[] elemt = new String[6];
 							donnee.seek(0);
@@ -770,7 +757,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 
 	public static ArrayList<Livre> remplirArrayliste() {
 		ArrayList<Livre> listeLivres = new ArrayList<Livre>();
-		File file = new File("src\\livres.bin");
+		File file = new File(FICHIER_BIN);
 		if(file.exists()){
 
 		int num=0;
@@ -781,7 +768,7 @@ public DefaultTableModel remplirTable(String entree,String strCle) {
 		String cathegorie="";
 	
 		try {
-			donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+			donnee = new RandomAccessFile(new File(FICHIER_BIN), "rw");
 			//donnee.seek(0);
 			//for (int i=0;i<donnee.length();i++){
 			for(Integer key:addresseMap.keySet()){
@@ -881,7 +868,7 @@ public void sauvgarder() {
 		int pages = 0;
 		String cathegorie = "";
 		try {
-					donnee = new RandomAccessFile(new File("src\\livres.bin"), "rw");
+					donnee = new RandomAccessFile(new File(FICHIER_BIN), "rw");
 					donnee.seek(0);
 					//long debut=0;
 					for (Integer key:addresseMap.keySet()){
@@ -929,12 +916,13 @@ public HashMap<Integer, TableIndex> getAddresseMap() {
 	}
 	public long rechercherAddresseVide(String titre, String cathegorie) {
 		long adr=-1;
-		for(TableIndex val:addresseMap.values()){
-			//System.out.println(val[0] + " " + val[2] + " " + val[1] + " " + tailleMot(titre, cathegorie));
-			//System.out.println(-1*cle + " " + addresseMap.get(-1*cle)[0] + " " + addresseMap.get(-1*cle)[1] + " " + addresseMap.get(-1*cle)[2]);
-			if(val.getStatus()==0 && val.getAdr()>= tailleMot(titre, cathegorie)){
-				adr=val.getAdr();
-				break;
+		for(Integer key:addresseMap.keySet()){
+			if(key<0){
+				if(tailleMot(titre,cathegorie)<=addresseMap.get(key).getTaille()){
+					adr=addresseMap.get(key).getAdr();
+					break;
+				}
+
 			}
 		} 
 		return adr;
@@ -961,6 +949,9 @@ public HashMap<Integer, TableIndex> getAddresseMap() {
 	 public static void main(String[] args) {
 		Application frame = new Application();
 		frame.setVisible(true);
+		for(Integer key:addresseMap.keySet()){
+		System.out.println(key + " " + addresseMap.get(key).getAdr());
+		}
 		//remplirArrayliste();
 	 }	
 
