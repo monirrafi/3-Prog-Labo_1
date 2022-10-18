@@ -263,6 +263,7 @@ public void Suprimer() {
 	
 }
 public void ajouter() {
+	afficheTextArea();
 	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre a ajouter");
 	int cle= Integer.parseInt(strCle);
 	if(rechercheCle(cle)){
@@ -311,6 +312,7 @@ public void ajouter() {
 					e.getMessage();
 				}
 		maj();
+		afficheTextArea();
 		}	
 	}
 //	sauvgarder();
@@ -318,6 +320,7 @@ public void ajouter() {
 }
 public void modifierLivre() {
 	//ArrayList<Livre> listeLivres = remplirArrayliste();
+	afficheTextArea();
 	String strCle = JOptionPane.showInputDialog(null, "Entrez le numéro du livre a modifier");
 	int cle= Integer.parseInt(strCle);
 	if(!rechercheCle(cle)){
@@ -358,6 +361,7 @@ public void modifierLivre() {
 			e.getMessage();
 		}
 	maj();
+	afficheTextArea();
 	}
 //	sauvgarder();
 
@@ -944,6 +948,14 @@ public HashMap<Integer, TableIndex> getAddresseMap() {
 			taille+=1;
 		}
 		return taille;
+	}
+	public void afficheTextArea() {
+		JTextArea sortie = new JTextArea();
+		for(Integer key:addresseMap.keySet()){
+			sortie.append(key + " " + addresseMap.get(key).getAdr() + " " + addresseMap.get(key).getTaille()+"\n");
+			}
+		JOptionPane.showMessageDialog(null, sortie);	
+
 	}
 
 	 public static void main(String[] args) {
