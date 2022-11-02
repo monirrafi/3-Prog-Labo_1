@@ -1,3 +1,4 @@
+package modelLivre;
 public class Livre {
     private int num = 0;
     private String  titre = "";
